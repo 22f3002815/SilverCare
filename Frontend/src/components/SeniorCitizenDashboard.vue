@@ -75,9 +75,17 @@
       </div>
 
       <div class="right-panel">
-        <MusicPlayer />
+        <button
+          class="music-toggle-btn"
+          @click="showMusicPlayer = !showMusicPlayer"
+          style="margin-bottom:1rem"
+        >
+          {{ showMusicPlayer ? 'Hide Music Player' : 'Show Music Player' }}
+        </button>
+        <MusicPlayer v-if="showMusicPlayer" />
         <AppCalendar />
       </div>
+
       <AddMedicineModal
   v-if="showAddMedicineModal"
   @close="showAddMedicineModal = false"
@@ -109,6 +117,8 @@ const error = ref(null);
 const sosLoading = ref(false);
 const sosMessage = ref('');
 const showAddMedicineModal = ref(false);
+const showMusicPlayer = ref(true); // Default: shown
+
 const formattedDate = computed(() =>
   new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -596,6 +606,21 @@ onMounted(() => {
   margin-bottom: 1rem;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
   background-color: #96ace9;
+}
+
+.music-toggle-btn {
+  background-color: #eeddf2;
+  color: #4a148c;
+  border: 1px solid #d3b9d9;
+  border-radius: 20px;
+  padding: 0.4rem 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: background 0.2s;
+}
+.music-toggle-btn:hover {
+  background-color: #d3b9d9;
 }
 
 </style>

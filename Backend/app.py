@@ -20,6 +20,7 @@ def create_app():
 
     CORS(app, resources={r"/*": {"origins": [
     "http://localhost:8080",
+    "http://localhost:8081",
     "http://10.244.53.76:8080"
 ]}}, supports_credentials=True)
 

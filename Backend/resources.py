@@ -2628,33 +2628,26 @@ class MyMusic(Resource):
             playlist = [
                 {
                     "id": 1,
-                    "title": "A New Beginning",
+                    "title": "Memories",
                     "artist": "Bensound",
-                    "url": "https://www.bensound.com/bensound-music/bensound-anewbeginning.mp3",
-                    "cover": "https://i.imgur.com/a1dzZvv.jpeg"
+                    "url": "https://www.bensound.com/bensound-music/bensound-memories.mp3",
+                    "cover": "https://i.ytimg.com/vi/zi_oR296950/hqdefault.jpg"
                 },
                 {
                     "id": 2,
                     "title": "Energy",
                     "artist": "Bensound",
                     "url": "https://www.bensound.com/bensound-music/bensound-energy.mp3",
-                    "cover": "https://i.imgur.com/aP1B7tL.jpeg"
+                    "cover": "https://i1.sndcdn.com/artworks-B7MF52qXlsrbOro7-fVz7RQ-t500x500.jpg"
                 },
                 {
                     "id": 3,
-                    "title": "Memories",
+                    "title": "A New Beginning",
                     "artist": "Bensound",
-                    "url": "https://www.bensound.com/bensound-music/bensound-memories.mp3",
-                    "cover": "https://i.imgur.com/MjmN94X.jpeg"
+                    "url": "https://www.bensound.com/bensound-music/bensound-anewbeginning.mp3",
+                    "cover": "https://i.ytimg.com/vi/MN5vSCdnqII/maxresdefault.jpg"
                 },
-                {
-                    "id": 4,
-                    "title": "Munni Badnaam Hui",
-                    "artist": "Mamta Sharma",
-                    "url": "http://127.0.0.1:5000/static/music/Munni_Badnaam_Hui.mp3",
-                    "cover": "https://i.ytimg.com/vi/Jn5hsfbhWx4/sddefault.jpg"
-                }
-
+                
             ]
 
             return {"tracks": playlist}, 200

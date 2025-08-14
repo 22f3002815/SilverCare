@@ -44,7 +44,7 @@ import apiService from '@/services/apiService'
 
 const audioRef = ref(null)
 const playlist = ref([])
-const defaultCover = 'https://via.placeholder.com/200x200?text=Cover'
+const defaultCover = 'https://cdn-images.dzcdn.net/images/cover/6db53b3b17d014f11327e915cd3f984b/1900x1900-000000-80-0-0.jpg'
 const activeIndex = ref(0)
 
 const isPlaying = ref(false)
