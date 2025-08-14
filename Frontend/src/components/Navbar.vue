@@ -8,9 +8,16 @@
       </button>
       <div class="collapse navbar-collapse" id="navbar">
         <div class="navbar-nav">
-          <a class="nav-item nav-link text-dark" @click="userHome">
-            <h3>SilverCare</h3>
-          </a>
+          <div v-if="role === 'care_giver'">
+            <a class="nav-item nav-link text-dark" href="/cg">
+              <h3>SilverCare</h3>
+            </a>
+          </div>
+          <div v-if="role === 'senior_citizen'">
+            <a class="nav-item nav-link text-dark" href="/sc">
+              <h3>SilverCare</h3>
+            </a>
+          </div>
         </div>
         <div class="navbar-nav ml-auto" v-if="role">
           <!-- Notification Bell Icon -->
