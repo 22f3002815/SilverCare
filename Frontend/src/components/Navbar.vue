@@ -1,0 +1,242 @@
+<!-- eslint-disable vue/multi-word-component-names -->
+<template>
+  <div>
+    <!-- ... (head links omitted for brevity) ... -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-info fixed-top">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link text-dark" @click="userHome">
+            <h3>SilverCare</h3>
+          </a>
+        </div>
+        <div class="navbar-nav ml-auto" v-if="role">
+          <!-- Notification Bell Icon -->
+          <div v-if="role === 'senior_citizen'|| role==='care_giver'" class="nav-item position-relative mr-3" @click="toggleModal">
+            <i class="fa fa-bell text-white" style="font-size: 24px; cursor: pointer;"></i>
+            <span v-if="notificationCount > 0" class="badge badge-danger badge-pill notification-badge">
+              {{ notificationCount }}
+            </span>
+          </div>
+          <div v-if="role === 'senior_citizen'|| role==='care_giver'">
+          <a class="nav-link profile-icon-link" href="#" @click="showHealthEntryModal = true">
+            <i class="fa fa-stethoscope"></i>
+          </a>
+          </div>
+          <div class="nav-item dropdown-container">
+            <a class="nav-link profile-icon-link" href="#">
+              <i class="fa fa-user-circle"></i>
+            </a>
+            <div class="dropdown-menu-hover">
+              <template v-if="role==='care_giver'">
+                <a class="dropdown-item" href="/cg">Home</a>
+              </template>
+              <template v-if="role==='senior_citizen'">
+                <a class="dropdown-item" href="/sc">Home</a>
+              </template>
+              <template v-if="role === 'senior_citizen' || role === 'care_giver'">
+                <a class="dropdown-item" href="/profile">My Profile</a>
+                <a class="dropdown-item" href="/stats">Reports</a>
+              </template>
+              <template v-if="role==='care_giver'">
+                <a class="dropdown-item" href="/manage-dependents">Member Details</a>
+              </template>
+              <template v-if="role==='admin'">
+                <a class="dropdown-item" href="/admin">Home</a>
+                <a class="dropdown-item" href="/admin-medicines">Medicines</a>
+              </template>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item logout-item" @click="logout">Logout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <HealthEntry
+      v-if="showHealthEntryModal"
+      :role="role"
+      @close="showHealthEntryModal = false"
+    />
+    <NotificationModal
+      :show="showModal"
+        :role="role"
+      @close="showModal = false"
+      @updated="getNotificationCount"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import NotificationModal from "@/components/NotificationModal.vue"
+import HealthEntry from "@/components/HealthEntry.vue"
+import apiService from '@/services/apiService'
+
+const role = ref(null)
+const router = useRouter()
+const showModal = ref(false)
+const notificationCount = ref(0)
+const showHealthEntryModal = ref(false)
+
+onMounted(() => {
+      const storedRole = sessionStorage.getItem('role')
+      if (storedRole) {
+   role.value = storedRole
+getNotificationCount()
+
+}
+})
+function toggleModal() {
+  showModal.value = true
+}
+async function getNotificationCount() {
+  try {
+    const res = await apiService.get("/sc/notifications");
+    notificationCount.value = res.data?.count || 0;
+  } catch (err) {
+    console.error("Error fetching notifications:", err);
+  }
+}
+function logout() {
+  sessionStorage.clear()
+  router.push('/login')
+}
+</script>
+
+<style>
+.navbar {
+  background-color: #3b5998; /* Facebook blue */
+  padding: 16px;
+  font-family: 'Times New Roman';
+  font-style: italic;
+}
+
+
+.navbar ul {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  justify-content: space-around;
+}
+
+
+.navbar li {
+  display: inline;
+}
+
+
+.navbar a {
+  color: white !important;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: font-weight 0.3s ease;
+  cursor: pointer; /* Change cursor to pointer */
+}
+
+
+.navbar a:hover {
+  font-weight: bold;
+}
+
+
+.navbar .fa {
+  font-size: 18px;
+}
+
+
+.text-dark {
+  color: white !important;
+}
+.dropdown-container {
+  position: relative;
+}
+
+
+.dropdown-menu-hover {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  width: 180px;
+  padding: 0.5rem 0;
+  z-index: 1000;
+  border: 1px solid #eee;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.25s ease-out;
+}
+
+
+.dropdown-container:hover .dropdown-menu-hover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+
+.dropdown-menu-hover .dropdown-item {
+  display: block;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  color: #333 !important;
+  font-weight: 500;
+}
+
+
+.dropdown-menu-hover .dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #eee;
+  margin: 0.5rem 0;
+}
+
+
+.logout-item {
+  color: #d9534f !important;
+  font-weight: bold !important;
+}
+.notification-badge {
+  position: absolute;
+  top: 0;
+  right: -6px;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;  /* Make sure it's on top */
+}
+
+
+/* Modal Content */
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 100px;
+  max-width: 30%;
+  z-index: 1060;  /* Ensure it's above overlay */
+}
+
+</style> 
