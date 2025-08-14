@@ -422,8 +422,9 @@ class UpdateMedicineMapping(Resource):
             if "start_date" in data:
                 med_mapping.start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
 
-            if "end_date" in data:
-                med_mapping.end_date = datetime.strptime(data["end_date"], "%Y-%m-%d").date()
+            if "end_date" in data or "endDate" in data:
+                incoming_val = data.get("end_date") or data.get("endDate")
+                med_mapping.end_date = datetime.strptime(incoming_val, "%Y-%m-%d").date()
 
             # --- Slot updates ---
             for field in [
