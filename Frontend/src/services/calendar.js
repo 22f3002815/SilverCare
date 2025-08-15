@@ -53,9 +53,19 @@ const medicationService = {
         
         if (result[dateStr]) {
           const dayData = result[dateStr];
+          const taken = dayData.taken || 0;
+          const missed = dayData.missed || 0;
+          const total = taken + missed;
+
+          // Calculate percentages for the progress bar
+          const takenPercentage = total > 0 ? (taken / total) * 100 : 0;
+          const missedPercentage = total > 0 ? (missed / total) * 100 : 0;
+
           medicationData = {
-            taken: dayData.taken || 0,
-            missed: dayData.missed || 0,
+            taken,
+            missed,
+            takenPercentage, // New property
+            missedPercentage, // New property
             isToday,
             isFuture,
             isPast
@@ -69,7 +79,6 @@ const medicationService = {
         });
       }
       
-      // Removed the 'while (medicationDays.length < 42)' loop
       return medicationDays;
     } catch (err) {
       console.error('API call failed, generating fallback data:', err);
@@ -100,9 +109,18 @@ const medicationService = {
       
       let medicationData = null;
       if (!isFuture) {
+         const taken = Math.floor(Math.random() * 3);
+         const missed = Math.floor(Math.random() * 2);
+         const total = taken + missed;
+
+         const takenPercentage = total > 0 ? (taken / total) * 100 : 0;
+         const missedPercentage = total > 0 ? (missed / total) * 100 : 0;
+
          medicationData = {
-          taken: Math.floor(Math.random() * 3),
-          missed: Math.floor(Math.random() * 2),
+          taken,
+          missed,
+          takenPercentage,
+          missedPercentage,
           isToday,
           isFuture,
           isPast
@@ -116,7 +134,6 @@ const medicationService = {
       });
     }
     
-    // Removed the 'while (fallbackDays.length < 42)' loop
     return fallbackDays;
   },
 
