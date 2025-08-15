@@ -34,17 +34,18 @@
         <div class="cell-label">{{ day.label }}</div>
         <div class="cell-data">
           <template v-if="day.medicationData">
-            <div class="status-indicator taken">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-              </svg>
-              <span>{{ day.medicationData.taken || 0 }}</span>
+            <div class="status-bar-container">
+              <div
+                class="status-bar taken"
+                :style="{ width: day.medicationData.takenPercentage + '%' }"
+              ></div>
+              <div
+                class="status-bar missed"
+                :style="{ width: day.medicationData.missedPercentage + '%' }"
+              ></div>
             </div>
-            <div class="status-indicator missed">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-              </svg>
-              <span>{{ day.medicationData.missed || 0 }}</span>
+            <div class="total-meds">
+              {{ (day.medicationData.taken || 0) + (day.medicationData.missed || 0) }} total
             </div>
           </template>
           <template v-else>
@@ -57,7 +58,7 @@
 </template>
 
 <script setup>
-// (The <script setup> block remains unchanged from the previous version)
+// (The <script setup> block needs a small adjustment to calculate percentages)
 import { ref, onMounted, watch } from 'vue';
 import medicationService from '@/services/calendar.js';
 import apiService from '@/services/apiService.js';
@@ -142,7 +143,7 @@ watch([currentMonth, currentYear, selectedDependent], () => {
 </script>
 
 <style scoped>
-/* (The <style> block is the one that has major changes. The rest is the same) */
+/* (The <style> block is where we'll add the new styling for the progress bar) */
 .calendar-wrapper {
   padding: 1.5rem;
   background-color: #f8f9fa;
@@ -279,38 +280,33 @@ watch([currentMonth, currentYear, selectedDependent], () => {
   margin-top: auto;
 }
 
-/* New and Updated Styles for Status Indicators */
-.status-indicator {
+/* New Styles for the Status Bar */
+.status-bar-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-  gap: 4px; /* Space between icon and text */
+  width: 100%;
+  height: 10px; /* Thinner bar */
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: #e9ecef; /* Gray background for empty state */
 }
 
-/* SVG icon styling */
-.status-indicator svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.status-bar {
+  height: 100%;
+  transition: width 0.3s ease;
 }
 
-.taken {
-  color: #28a745; /* green */
+.status-bar.taken {
+  background-color: #28a745; /* Green for taken */
 }
 
-.taken svg {
-  fill: #28a745;
+.status-bar.missed {
+  background-color: #dc3545; /* Red for missed */
 }
 
-.missed {
-  color: #dc3545; /* red */
-}
-
-.missed svg {
-  fill: #dc3545;
+.total-meds {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #6c757d;
+  margin-top: 5px;
 }
 </style>
