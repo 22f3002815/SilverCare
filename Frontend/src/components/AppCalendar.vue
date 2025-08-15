@@ -30,6 +30,7 @@
           future: day.medicationData?.isFuture,
           past: day.medicationData?.isPast
         }]"
+        :title="day.medicationData ? `Taken: ${day.medicationData.taken}\nMissed: ${day.medicationData.missed}` : ''"
       >
         <div class="cell-label">{{ day.label }}</div>
         <div class="cell-data">
@@ -58,7 +59,6 @@
 </template>
 
 <script setup>
-// (The <script setup> block needs a small adjustment to calculate percentages)
 import { ref, onMounted, watch } from 'vue';
 import medicationService from '@/services/calendar.js';
 import apiService from '@/services/apiService.js';
@@ -143,7 +143,7 @@ watch([currentMonth, currentYear, selectedDependent], () => {
 </script>
 
 <style scoped>
-/* (The <style> block is where we'll add the new styling for the progress bar) */
+/* All the CSS remains exactly the same as the previous version. */
 .calendar-wrapper {
   padding: 1.5rem;
   background-color: #f8f9fa;
@@ -280,14 +280,13 @@ watch([currentMonth, currentYear, selectedDependent], () => {
   margin-top: auto;
 }
 
-/* New Styles for the Status Bar */
 .status-bar-container {
   display: flex;
   width: 100%;
-  height: 10px; /* Thinner bar */
+  height: 10px;
   border-radius: 5px;
   overflow: hidden;
-  background-color: #e9ecef; /* Gray background for empty state */
+  background-color: #e9ecef;
 }
 
 .status-bar {
@@ -296,11 +295,11 @@ watch([currentMonth, currentYear, selectedDependent], () => {
 }
 
 .status-bar.taken {
-  background-color: #28a745; /* Green for taken */
+  background-color: #28a745;
 }
 
 .status-bar.missed {
-  background-color: #dc3545; /* Red for missed */
+  background-color: #dc3545;
 }
 
 .total-meds {
