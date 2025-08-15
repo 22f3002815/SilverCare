@@ -6,7 +6,7 @@
       <button @click="goToNextMonth" class="arrow-button">⟩</button>
     </div>
 
-    <div class="toggle-buttons">
+    <div class="toggle-buttons" v-if="dependents.length > 0">
       <button
         v-for="dep in dependents"
         :key="dep.id"
@@ -23,7 +23,7 @@
 
     <div class="calendar-grid">
       <div
-        v-for="(day, index) in visibleCalendarData"
+        v-for="(day, index) in calendarData"
         :key="index"
         :class="['calendar-cell', {
           today: day.medicationData?.isToday,
@@ -36,8 +36,7 @@
           <template v-if="day.medicationData">
             <span class="taken">✅ {{ day.medicationData.taken || 0 }}</span>
             <span class="missed">❌ {{ day.medicationData.missed || 0 }}</span>
-            <span class="pending">🕒 {{ day.medicationData.pending || 0 }}</span>
-          </template>
+            </template>
           <template v-else>
             <span class="future-placeholder">-</span>
           </template>
@@ -48,7 +47,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import medicationService from '@/services/calendar.js';
 import apiService from '@/services/apiService.js';
 
@@ -66,22 +65,10 @@ const monthNames = [
 
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-// Add computed property for daysInMonth
-const daysInMonth = computed(() => {
-  return new Date(currentYear.value, currentMonth.value, 0).getDate();
-});
-
-// Add computed property for visible calendar cells
-const visibleCalendarData = computed(() => {
-  return calendarData.value.filter(
-    day => day.label === '' || parseInt(day.label) <= daysInMonth.value
-  );
-});
-
 async function loadDependents() {
+  console.log("Loading dependents...");
   try {
     const response = await apiService.get('/sc/my-dependents');
-    // API returns { dependents: [ { id, firstName, lastName, ... } ] }
     dependents.value = response.data.dependents.map(dep => ({
       id: dep.id,
       name: dep.firstName + ' ' + dep.lastName
@@ -96,7 +83,12 @@ async function loadDependents() {
 
 async function loadCalendarData() {
   try {
-    if (!selectedDependent.value) return;
+    if (!selectedDependent.value) {
+      console.log('No dependent selected. Skipping API call.');
+      calendarData.value = [];
+      return;
+    }
+    console.log(`Making API call for: Dependent ID ${selectedDependent.value}, Month: ${currentMonth.value}, Year: ${currentYear.value}`);
     calendarData.value = await medicationService.generateCalendarData(currentMonth.value, currentYear.value, selectedDependent.value);
   } catch (error) {
     console.error('Failed to load calendar data:', error);
@@ -110,7 +102,6 @@ function goToPreviousMonth() {
   } else {
     currentMonth.value--;
   }
-  loadCalendarData();
 }
 
 function goToNextMonth() {
@@ -120,12 +111,10 @@ function goToNextMonth() {
   } else {
     currentMonth.value++;
   }
-  loadCalendarData();
 }
 
 function selectDependent(depId) {
   selectedDependent.value = depId;
-  loadCalendarData();
 }
 
 onMounted(async () => {
@@ -133,114 +122,172 @@ onMounted(async () => {
   if (role === 'care_giver') {
     await loadDependents();
     await loadCalendarData();
+  } else {
+    selectedDependent.value = sessionStorage.getItem('user_id');
+    await loadCalendarData();
   }
 });
-watch([currentMonth, currentYear, selectedDependent], loadCalendarData);
+
+watch([currentMonth, currentYear, selectedDependent], () => {
+  loadCalendarData();
+});
 </script>
 
 <style scoped>
+/* Base container for the whole calendar */
 .calendar-wrapper {
-  padding: 1rem;
-  background-color: #fff;
-  border-radius: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  font-family: 'Times New Roman', serif;
+  padding: 1.5rem;
+  background-color: #f8f9fa; /* Lighter background */
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); /* Softer, more pronounced shadow */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #343a40; /* Darker text for better contrast */
+  max-width: 600px;
+  margin: 2rem auto;
 }
 
+/* Header styling for month and year navigation */
 .calendar-header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e9ecef;
 }
 
 .arrow-button {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   background: none;
   border: none;
   cursor: pointer;
-  color: #0d6efd;
-  transition: transform 0.2s ease;
+  color: #007bff; /* Primary blue color */
+  transition: transform 0.2s ease, color 0.2s ease;
+  padding: 0 10px;
 }
 
 .arrow-button:hover {
-  transform: scale(1.3);
+  transform: scale(1.2);
+  color: #0056b3; /* Darker blue on hover */
 }
 
 .calendar-title {
-  font-size: 1.5rem;
-  color: #2c3e50;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #495057;
+  text-transform: capitalize;
 }
 
+/* Toggle buttons for dependents */
 .toggle-buttons {
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
-  gap: 1rem;
+  margin-bottom: 1.5rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .toggle-buttons button {
-  padding: 0.4rem 1rem;
-  border: 1px solid #0d6efd;
-  background-color: #f4f4f4;
-  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid #007bff;
+  background-color: #ffffff;
+  border-radius: 25px;
   cursor: pointer;
+  font-weight: 500;
+  color: #007bff;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .toggle-buttons .active {
-  background-color: #0d6efd;
+  background-color: #007bff;
   color: white;
+  border-color: #007bff;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
 }
 
+/* Weekday row styling */
 .weekday-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   font-weight: bold;
+  color: #6c757d;
+  font-size: 0.9rem;
 }
 
+/* Main calendar grid layout */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
 }
 
+/* Individual calendar cells */
 .calendar-cell {
-  background-color: #f4f4f4;
-  border-radius: 10px;
-  padding: 0.5rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 0.75rem;
   text-align: center;
-  border: 1px solid #ddd;
-  font-size: 0.95rem;
+  border: 1px solid #e9ecef;
+  font-size: 0.9rem;
+  min-height: 80px; /* Ensure a consistent height for cells */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.calendar-cell:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* State-based cell styling */
 .calendar-cell.today {
-  border: 2px solid #0d6efd;
-  background-color: #e6f0ff;
+  border: 2px solid #007bff;
+  background-color: #e6f7ff;
 }
 
 .calendar-cell.future {
-  opacity: 0.6;
+  opacity: 0.7;
+  background-color: #f1f3f5;
+  cursor: not-allowed;
 }
 
 .calendar-cell.past {
-  background-color: #fefefe;
+  background-color: #ffffff;
 }
 
+/* Cell content styling */
 .cell-label {
   font-weight: bold;
+  font-size: 1.1rem;
   margin-bottom: 0.25rem;
+  color: #495057;
+}
+
+.calendar-cell.future .cell-label {
+  color: #adb5bd;
 }
 
 .cell-data {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.25rem;
+  margin-top: auto; /* Pushes content to the bottom */
 }
 
-.taken { color: green; }
-.missed { color: red; }
-.pending { color: orange; }
+/* Status icon colors and alignment */
+.taken, .missed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.taken { color: #28a745; } /* Green */
+.missed { color: #dc3545; } /* Red */
+
 </style>
