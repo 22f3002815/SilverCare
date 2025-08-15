@@ -1,4 +1,3 @@
-// Import the default export, which is the axios instance itself
 import apiService from './apiService';
 
 const medicationService = {
@@ -15,11 +14,9 @@ const medicationService = {
       
       const body = { month, year, user_id: parseInt(userId) };
 
-      // Use the imported default object directly to make the call
       const response = await apiService.post('/sc/status-report', body);
       const result = response.data;
       
-      // Log the API response for debugging
       console.log("API Response:", result);
 
       if (Object.keys(result).length === 0) {
@@ -36,7 +33,6 @@ const medicationService = {
 
       const medicationDays = [];
       
-      // Add empty cells for days before the first day of the month
       for (let i = 0; i < startingDayOfWeek; i++) {
         medicationDays.push({
           label: '',
@@ -45,7 +41,6 @@ const medicationService = {
         });
       }
       
-      // Fill in each day of the month, using data from the API
       for (let day = 1; day <= daysInMonth; day++) {
         const currentDate = new Date(year, month - 1, day);
         const dateStr = currentDate.toISOString().split('T')[0];
@@ -58,12 +53,9 @@ const medicationService = {
         
         if (result[dateStr]) {
           const dayData = result[dateStr];
-          const pendingCount = Object.values(dayData.details || {}).filter(v => v === null).length;
-
           medicationData = {
             taken: dayData.taken || 0,
             missed: dayData.missed || 0,
-            pending: pendingCount,
             isToday,
             isFuture,
             isPast
@@ -77,14 +69,7 @@ const medicationService = {
         });
       }
       
-      // Fill up to 42 cells (6 weeks) with empty cells at the end
-      while (medicationDays.length < 42) {
-        medicationDays.push({
-          label: '',
-          date: null,
-          medicationData: null
-        });
-      }
+      // Removed the 'while (medicationDays.length < 42)' loop
       return medicationDays;
     } catch (err) {
       console.error('API call failed, generating fallback data:', err);
@@ -118,7 +103,6 @@ const medicationService = {
          medicationData = {
           taken: Math.floor(Math.random() * 3),
           missed: Math.floor(Math.random() * 2),
-          pending: Math.floor(Math.random() * 2),
           isToday,
           isFuture,
           isPast
@@ -132,17 +116,11 @@ const medicationService = {
       });
     }
     
-    while (fallbackDays.length < 42) {
-      fallbackDays.push({
-        label: '',
-        date: null,
-        medicationData: null
-      });
-    }
+    // Removed the 'while (fallbackDays.length < 42)' loop
     return fallbackDays;
   },
 
-  // The rest of the methods remain unchanged, but they should also use `apiService` directly.
+  // The rest of the methods remain unchanged.
   async getDayMedications(date) {
     await new Promise(resolve => setTimeout(resolve, 300));
     return {
@@ -150,7 +128,6 @@ const medicationService = {
       medications: [
         { name: 'Vitamin D', time: '8:00 AM', status: 'taken', person: 'Mom' },
         { name: 'Blood Pressure Med', time: '12:00 PM', status: 'missed', person: 'Dad' },
-        { name: 'Diabetes Med', time: '6:00 PM', status: 'pending', person: 'Uncle' },
       ]
     };
   },
