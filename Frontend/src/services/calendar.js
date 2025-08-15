@@ -1,28 +1,41 @@
-import apiService from './apiService'
+// Import the default export, which is the axios instance itself
+import apiService from './apiService';
 
 const medicationService = {
   // Generate calendar data for a specific month/year
-  async generateCalendarData(month, year) {
+  async generateCalendarData(month, year, dependentId) {
     try {
-      const userId = sessionStorage.getItem('user_id');
-      const role = sessionStorage.getItem('role');
-      if (!userId) throw new Error('No user_id in sessionStorage');
-      // Prepare request body
-      const body = { month, year };
-      if (role === 'care_giver' || role === 'caregiver') {
-        body.user_id = parseInt(userId);
+      console.log(`API Call: /sc/status-report with body: { month: ${month}, year: ${year}, user_id: ${dependentId} }`);
+      
+      const userId = dependentId || sessionStorage.getItem('user_id');
+      if (!userId) {
+        console.error('No user_id in sessionStorage or dependentId provided');
+        return [];
       }
-      // POST to /sc/status-report
-      const response = await apiService.api.post('/sc/status-report', body);
+      
+      const body = { month, year, user_id: parseInt(userId) };
+
+      // Use the imported default object directly to make the call
+      const response = await apiService.post('/sc/status-report', body);
       const result = response.data;
-      // result is an object: { 'YYYY-MM-DD': { taken, missed, details: {...} }, ... }
-      // Build calendar days array
+      
+      // Log the API response for debugging
+      console.log("API Response:", result);
+
+      if (Object.keys(result).length === 0) {
+        console.log("API returned no data for the requested month.");
+      }
+      
       const daysInMonth = new Date(year, month, 0).getDate();
       const firstDay = new Date(year, month - 1, 1);
-      // Monday as first day of week
-      const startingDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+      let startingDayOfWeek = firstDay.getDay();
+      startingDayOfWeek = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1;
+      
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       const medicationDays = [];
+      
       // Add empty cells for days before the first day of the month
       for (let i = 0; i < startingDayOfWeek; i++) {
         medicationDays.push({
@@ -31,77 +44,105 @@ const medicationService = {
           medicationData: null
         });
       }
-      // Fill in each day
+      
+      // Fill in each day of the month, using data from the API
       for (let day = 1; day <= daysInMonth; day++) {
         const currentDate = new Date(year, month - 1, day);
         const dateStr = currentDate.toISOString().split('T')[0];
-        const isToday = currentDate.toDateString() === today.toDateString();
+        
+        const isToday = currentDate.getTime() === today.getTime();
         const isFuture = currentDate > today;
         const isPast = currentDate < today;
-        let taken = 0, missed = 0, pending = 0, completionRate = 0;
+        
+        let medicationData = null; 
+        
         if (result[dateStr]) {
-          taken = result[dateStr].taken || 0;
-          missed = result[dateStr].missed || 0;
-          // Pending: count slots that are neither taken nor missed (null)
-          const details = result[dateStr].details || {};
-          pending = Object.values(details).filter(v => v === null).length;
-          completionRate = taken + missed > 0 ? (taken / (taken + missed)) * 100 : 0;
-        } else if (isFuture) {
-          pending = 1; // At least one pending for future days
+          const dayData = result[dateStr];
+          const pendingCount = Object.values(dayData.details || {}).filter(v => v === null).length;
+
+          medicationData = {
+            taken: dayData.taken || 0,
+            missed: dayData.missed || 0,
+            pending: pendingCount,
+            isToday,
+            isFuture,
+            isPast
+          };
         }
+        
         medicationDays.push({
           label: day.toString(),
           date: dateStr,
-          medicationData: {
-            taken,
-            missed,
-            pending,
-            isToday,
-            isFuture,
-            isPast,
-            completionRate
-          }
+          medicationData: medicationData
         });
       }
-      return medicationDays;
-    } catch (err) {
-      // Fallback to mock data if API fails
-      return await this.generateFallbackData();
-    }
-  },
-
-  // Fallback data for when API fails
-  async generateFallbackData() {
-    const today = new Date();
-    const fallbackDays = [];
-    // Generate 42 days (6 weeks) of fallback data
-    for (let i = 0; i < 42; i++) {
-      if (i < 7) {
-        fallbackDays.push({
+      
+      // Fill up to 42 cells (6 weeks) with empty cells at the end
+      while (medicationDays.length < 42) {
+        medicationDays.push({
           label: '',
           date: null,
           medicationData: null
         });
-      } else {
-        const day = i - 6;
-        fallbackDays.push({
-          label: day.toString(),
-          date: `2025-01-${day.toString().padStart(2, '0')}`,
-          medicationData: {
-            taken: Math.floor(Math.random() * 3),
-            missed: Math.floor(Math.random() * 2),
-            pending: Math.floor(Math.random() * 2),
-            isToday: day === today.getDate(),
-            isFuture: day > today.getDate(),
-            isPast: day < today.getDate()
-          }
-        });
       }
+      return medicationDays;
+    } catch (err) {
+      console.error('API call failed, generating fallback data:', err);
+      return await this.generateFallbackData(month, year);
+    }
+  },
+
+  async generateFallbackData(month, year) {
+    const today = new Date();
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const firstDay = new Date(year, month - 1, 1);
+    let startingDayOfWeek = firstDay.getDay();
+    startingDayOfWeek = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1;
+    const fallbackDays = [];
+    
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      fallbackDays.push({
+        label: '',
+        date: null,
+        medicationData: null
+      });
+    }
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const isToday = day === today.getDate() && month === (today.getMonth() + 1) && year === today.getFullYear();
+      const isFuture = (new Date(year, month - 1, day) > today) && !isToday;
+      const isPast = (new Date(year, month - 1, day) < today) && !isToday;
+      
+      let medicationData = null;
+      if (!isFuture) {
+         medicationData = {
+          taken: Math.floor(Math.random() * 3),
+          missed: Math.floor(Math.random() * 2),
+          pending: Math.floor(Math.random() * 2),
+          isToday,
+          isFuture,
+          isPast
+        };
+      }
+      
+      fallbackDays.push({
+        label: day.toString(),
+        date: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`,
+        medicationData
+      });
+    }
+    
+    while (fallbackDays.length < 42) {
+      fallbackDays.push({
+        label: '',
+        date: null,
+        medicationData: null
+      });
     }
     return fallbackDays;
   },
 
-  // Get medication details for a specific day (mock)
+  // The rest of the methods remain unchanged, but they should also use `apiService` directly.
   async getDayMedications(date) {
     await new Promise(resolve => setTimeout(resolve, 300));
     return {
@@ -114,10 +155,9 @@ const medicationService = {
     };
   },
 
-  // ... keep all other existing methods (getMedicationReport, getAllMedicines, getUpcomingMedicines, sendReminder, processCalendarData, etc.) ...
   async getMedicationReport(month, year, userId) {
     try {
-      const response = await apiService.api.post('/sc/status-report', {
+      const response = await apiService.post('/sc/status-report', {
         month,
         year,
         user_id: userId
@@ -131,7 +171,7 @@ const medicationService = {
 
   async getAllMedicines() {
     try {
-      const response = await apiService.api.get('/sc/medicines')
+      const response = await apiService.get('/sc/medicines')
       return response.data
     } catch (error) {
       console.error('Error fetching medicines:', error)
@@ -141,7 +181,7 @@ const medicationService = {
 
   async getUpcomingMedicines() {
     try {
-      const response = await apiService.api.get('/sc/upcoming-medications')
+      const response = await apiService.get('/sc/upcoming-medications')
       return response.data
     } catch (error) {
       console.error('Error fetching upcoming medicines:', error)
@@ -151,7 +191,7 @@ const medicationService = {
 
   async sendReminder(userId, medicineId) {
     try {
-      const response = await apiService.api.post('/sc/send-reminder', {
+      const response = await apiService.post('/sc/send-reminder', {
         user_id: userId,
         medicine_id: medicineId
       })
@@ -161,37 +201,6 @@ const medicationService = {
       throw error
     }
   },
-
-  processCalendarData(statusData) {
-    const processedData = {}
-    if (!statusData || !Array.isArray(statusData)) return processedData
-
-    statusData.forEach(dayData => {
-      const date = new Date(dayData.date).getDate()
-      let taken = 0, missed = 0, pending = 0
-      const slots = ['breakfast_before', 'breakfast_after', 'lunch_before', 'lunch_after', 'dinner_before', 'dinner_after']
-
-      slots.forEach(slot => {
-        if (Object.prototype.hasOwnProperty.call(dayData, slot)) {
-          if (dayData[slot] === true) taken++
-          else if (dayData[slot] === false) missed++
-          else if (dayData[slot] === null) pending++
-        }
-      })
-
-      processedData[date] = {
-        taken,
-        missed,
-        pending,
-        date: dayData.date,
-        details: dayData
-      }
-    })
-
-    return processedData
-  },
-
-  // The original generateCalendarData and generateFallbackData are now replaced by the above implementations
 }
 
-export default medicationService
+export default medicationService;
