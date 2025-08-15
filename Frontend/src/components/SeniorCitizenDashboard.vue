@@ -12,8 +12,8 @@
       </div>
       <div class="greeting-row">
         <button class="assign-btn" @click="showAddMedicineModal = true">
-  Assign Medicine
-</button>
+          Assign Medicine
+        </button>
         <button class="sos-button" @click="sendSOS" :disabled="sosLoading">
           {{ sosLoading ? '...' : 'SOS' }}
         </button>
@@ -28,19 +28,19 @@
       <div class="left-panel">
         <p class="motivational-quote">"The best way to predict the future is to create it."</p>
         <h2 class="greeting">Greetings, {{ userName }}</h2>
-                  <h3 class="subheading">Upcoming Medications</h3>
+        <h3 class="subheading">Upcoming Medications</h3>
         <div v-if="loading" class="upcoming-med-card placeholder">Loading...</div>
         <div v-else-if="upcomingMeds.length > 0">
-  <div v-for="med in upcomingMeds" :key="med.medicineId" class="upcoming-med-card">
-    <span class="med-name"><span class="icon pill-icon">💊</span>{{ med.medicineName }}</span>
-    <span class="med-dosage">{{ med.dosage }}</span>
-    <span class="med-time"><span class="icon clock-icon">⏰</span>{{ med.time }}</span>
-    <button class="mark-taken-btn" @click="markMedicineTaken(med.medicineId, getSlot(med.slot))">Mark as Taken</button>
-  </div>
-</div>
-<div v-else class="upcoming-med-card empty">
-  <h5 style="margin-left:0%">No medications in the current window.</h5>
-</div>
+          <div v-for="med in upcomingMeds" :key="med.medicineId" class="upcoming-med-card">
+            <span class="med-name"><span class="icon pill-icon">💊</span>{{ med.medicineName }}</span>
+            <span class="med-dosage">{{ med.dosage }}</span>
+            <span class="med-time"><span class="icon clock-icon">⏰</span>{{ med.time }}</span>
+            <button class="mark-taken-btn" @click="markMedicineTaken(med.medicineId, getSlot(med.slot))">Mark as Taken</button>
+          </div>
+        </div>
+        <div v-else class="upcoming-med-card empty">
+          <h5 style="margin-left:0%">No medications in the current window.</h5>
+        </div>
 
         <h3 class="subheading today-meds-title">Today's medications</h3>
         <div v-if="loading" class="todays-meds-container placeholder">Loading schedule...</div>
@@ -53,8 +53,7 @@
               <div v-for="med in daytimeMeds" :key="med.id" class="med-card day">
                 <span class="med-name"><span class="icon pill-icon">💊</span>{{ med.medicine_name || med.title }}</span>
                 <span class="med-dosage">{{ med.dosage }}</span>
-                <span class="med-time"><span class="icon clock-icon">⏰</span>  {{ med.times.join(", ") }}
-</span>
+                <span class="med-time"><span class="icon clock-icon">⏰</span>  {{ med.times.join(", ") }}</span>
               </div>
             </div>
           </div>
@@ -67,7 +66,6 @@
                 <span class="med-name"><span class="icon pill-icon">💊</span>{{ med.medicine_name || med.title || '-' }}</span>
                 <span class="med-dosage">{{ med.dosage || '-' }}</span>
                 <span class="med-time"><span class="icon clock-icon">⏰</span> {{ med.times.join(", ") }}</span>
-
               </div>
             </div>
           </div>
@@ -75,22 +73,28 @@
       </div>
 
       <div class="right-panel">
-        <button
-          class="music-toggle-btn"
-          @click="showMusicPlayer = !showMusicPlayer"
-          style="margin-bottom:1rem"
-        >
-          {{ showMusicPlayer ? 'Hide Music Player' : 'Show Music Player' }}
-        </button>
-        <MusicPlayer v-if="showMusicPlayer" />
+        <!-- Collapsible Music Player Card -->
+        <div class="collapsible-card">
+            <div class="collapsible-header" @click="showMusicPlayer = !showMusicPlayer">
+                <h4 class="collapsible-title">Soothing Music</h4>
+                <!-- Chevron Icon for toggle state indication -->
+                <svg :class="['toggle-icon', { 'rotated': showMusicPlayer }]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+            <!-- Transition for smooth collapse/expand -->
+            <transition name="slide-fade">
+                <div v-if="showMusicPlayer" class="collapsible-content">
+                    <MusicPlayer />
+                </div>
+            </transition>
+        </div>
         <AppCalendar />
       </div>
 
       <AddMedicineModal
-  v-if="showAddMedicineModal"
-  @close="showAddMedicineModal = false"
-  @add-medication="handleAddMedication"
-/>
+        v-if="showAddMedicineModal"
+        @close="showAddMedicineModal = false"
+        @add-medication="handleAddMedication"
+      />
 
       <div v-if="sosMessage" class="sos-alert" @click="sosMessage = ''">{{ sosMessage }}</div>
     </div>
@@ -99,14 +103,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-// import { useRoute } from 'vue-router';
-// import { getDependentDetails, getUpcomingMedication, getTodaysMedsForDependent } from '@/services/mockApi.js';
 import Navbar from './Navbar.vue';
 import AppCalendar from './AppCalendar.vue';
 import apiService from '@/services/apiService'
 import MusicPlayer from './MusicPlayer.vue';
 import AddMedicineModal from './AddMedicineModal.vue';
-// const route = useRoute();
 
 const userName = ref(sessionStorage.getItem('user_name') || 'User');
 const upcomingMeds = ref([]);
@@ -138,8 +139,6 @@ const slotMap = {
 
 function getSlot(reminderSlot) {
   if (!reminderSlot) return null;
-
-  // Adjust the logic here to correctly map the reminderSlot
   return slotMap[reminderSlot] || slotMap[reminderSlot.charAt(0).toUpperCase() + reminderSlot.slice(1)] || null;
 }
 
@@ -162,15 +161,13 @@ async function getUpcomingMedication() {
       };
     }
   } catch (err) {
-    // If 404, treat as no meds — not an error
     if (err.response && err.response.status === 404) {
       return {
-        success: true,          // Mark as success
-        meds: [],               // Empty meds array
+        success: true,
+        meds: [],
         count: 0,
       };
     }
-
     console.error("🔴 Error fetching upcoming medications:", err);
     return {
       success: false,
@@ -194,19 +191,16 @@ async function fetchAllDataForSenior() {
       slot: med.reminder_slot
     }));
 
-
     const todayRes = await apiService.get('/sc/todays-medications');
     if (todayRes.status === 200 && todayRes.data.medications) {
       daytimeMeds.value = todayRes.data.medications.filter(m => m.category === 'daytime');
-nighttimeMeds.value = todayRes.data.medications.filter(m => m.category === 'nighttime');
-
+      nighttimeMeds.value = todayRes.data.medications.filter(m => m.category === 'nighttime');
     } else {
       daytimeMeds.value = [];
       nighttimeMeds.value = [];
     }
   } catch (err) {
-    error.value = "No medicines yet — click Assign Medicine to get started."
-;
+    error.value = "No medicines yet — click Assign Medicine to get started.";
   } finally {
     loading.value = false;
   }
@@ -227,16 +221,10 @@ async function assignMedicineSchedule(payload) {
   }
 }
 
-
 async function handleAddMedication(payload) {
   showAddMedicineModal.value = false;
-
-  const finalPayload = {
-    ...payload,
-  };
-
+  const finalPayload = { ...payload };
   console.log('Payload sent:', finalPayload);
-
   const result = await assignMedicineSchedule(finalPayload);
 
   if (result.success) {
@@ -249,8 +237,8 @@ async function handleAddMedication(payload) {
 }
 
 async function markMedicineTaken(medicineId, slot) {
-  console.log("Medicine ID:", medicineId); // Check if the medicineId is correct
-  console.log("Slot:", slot); // Check if the slot is correct
+  console.log("Medicine ID:", medicineId);
+  console.log("Slot:", slot);
 
   const validSlots = [
     "breakfast_before", "breakfast_after",
@@ -271,7 +259,7 @@ async function markMedicineTaken(medicineId, slot) {
 
     if (res.status === 200) {
       alert('Medicine marked as taken.');
-      fetchAllDataForSenior();  // Refresh the data
+      fetchAllDataForSenior();
     } else {
       alert('Failed to mark medicine as taken.');
     }
@@ -286,21 +274,16 @@ async function sendSOS() {
   sosMessage.value = ''
 
   try {
-    const res = await apiService.post('/sc/send-sos') // Use Axios service
-
+    const res = await apiService.post('/sc/send-sos')
     if (res.status === 200 && res.data.status === 'SOS sent successfully') {
-      // Optional: log sent alerts
       console.log('✅ SOS Alert Sent:', res.data.alerts_sent)
-
       sosMessage.value = '🚨 SOS Alert sent to your caregivers.'
     } else {
       sosMessage.value = res.data.message || '⚠️ Could not send SOS alert.'
     }
   } catch (err) {
     console.error('❌ Error sending SOS:', err)
-
-    sosMessage.value =
-      err.response?.data?.error || '❌ Failed to send SOS alert.'
+    sosMessage.value = err.response?.data?.error || '❌ Failed to send SOS alert.'
   } finally {
     sosLoading.value = false
     setTimeout(() => {
@@ -365,13 +348,15 @@ onMounted(() => {
 }
 
 .upcoming-med-card {
-  padding: 1.2rem 2rem;
+  padding: 1rem 0.75rem;
   border-radius: 50px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 2fr auto;
   align-items: center;
+  text-align: center;
   gap: 1rem;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 500;
   margin-bottom: 1rem;
   border: 2px solid #6498f8;
   background-color: #96ace9;
@@ -387,17 +372,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.upcoming-med-card .poke-button {
-  background-color: #d9534f;
-  color: white;
-  font-weight: bold;
-  padding: 0.4rem 1.2rem;
-  border: none;
-  border-radius: 50px;
-  font-size: 1rem;
-  cursor: pointer;
+  justify-content: center;
 }
 
 .icon {
@@ -458,11 +433,12 @@ onMounted(() => {
 }
 
 .med-card {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  align-items: center;
+  text-align: center;
   padding: 1rem 1.2rem;
   border-radius: 50px;
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
   font-size: 1.05rem;
   font-weight: 500;
   margin-bottom: 1rem;
@@ -477,6 +453,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  justify-content: center;
 }
 
 .med-card.day {
@@ -489,31 +466,6 @@ onMounted(() => {
   background-color: #f3e8fd;
   color: #4a148c;
   border: 1px solid #c69be4;
-}
-
-.music-player {
-  background-color: #eeddf2;
-  border: 1px solid #d3b9d9;
-  padding: 1rem 1.5rem;
-  border-radius: 20px;
-  text-align: center;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #4a148c;
-}
-
-.calendar-placeholder {
-  border: 1px solid #ccc;
-  background: #fdfdfd;
-  padding: 1.5rem;
-  border-radius: 15px;
-  text-align: center;
-  color: #555;
-  font-style: italic;
-  flex-grow: 1;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
 .sos-button {
@@ -581,46 +533,57 @@ onMounted(() => {
 .mark-taken-btn:hover {
   background-color: #218838;
 }
-.med-card {
-  display: grid;
-  grid-template-columns: 2fr 1fr 2fr; /* name | dosage | times */
-  align-items: center;
-  text-align: center; /* values centered inside each column */
-  padding: 1rem 1.2rem;
-  border-radius: 50px;
-  font-size: 1.05rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
-}
-.upcoming-med-card {
-  display: grid;
-  /* name | dosage | time | action button */
-  grid-template-columns: 2.5fr 1fr 2fr auto;
-  align-items: center;
-  text-align: center;
-  padding: 1rem 0.75rem;
-  border-radius: 50px;
-  font-size: 1.05rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
-  background-color: #96ace9;
-}
 
-.music-toggle-btn {
-  background-color: #eeddf2;
-  color: #4a148c;
-  border: 1px solid #d3b9d9;
+/* --- Collapsible Music Player --- */
+.collapsible-card {
+  background-color: #ffffff;
   border-radius: 20px;
-  padding: 0.4rem 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  transition: background 0.2s;
-}
-.music-toggle-btn:hover {
-  background-color: #d3b9d9;
+  border: 1px solid #dbe8d9;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  overflow: hidden; /* Important for the transition */
+  transition: all 0.3s ease;
 }
 
+.collapsible-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  user-select: none; /* Prevents text selection on click */
+  background-color: #f3e8fd; /* Light purple to match theme */
+}
+
+.collapsible-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #4a148c;
+}
+
+.toggle-icon {
+  width: 20px;
+  height: 20px;
+  color: #4a148c;
+  transition: transform 0.3s ease;
+}
+
+.toggle-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* --- Vue Transition for Collapse --- */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}
 </style>

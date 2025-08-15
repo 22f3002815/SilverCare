@@ -1,33 +1,63 @@
 <template>
-  <div class="music-player">
-    <div class="cover">
-      <img :src="currentTrack.cover || defaultCover" alt="Album Cover" />
+  <div class="music-player-card">
+    <!-- Error State -->
+    <div v-if="error" class="error-state">
+      <p>Could not load music.</p>
+      <p class="error-message">{{ error }}</p>
     </div>
 
-    <div class="track-info">
-      <div class="song-title">{{ currentTrack.title }}</div>
-      <div class="song-artist">{{ currentTrack.artist }}</div>
-    </div>
+    <!-- Main Player UI (shows only if there's a playlist) -->
+    <template v-if="playlist.length > 0">
+      <!-- Album Art Display -->
+      <div class="album-art-container">
+        <img :src="currentTrack.cover || defaultCover" alt="Album Art" class="album-art" :class="{ 'playing': isPlaying }">
+      </div>
 
-    <div class="time-display">
-      <span>{{ formatTime(currentTime) }}</span>
-      <input type="range" min="0" :max="duration" step="0.1" v-model="seek" @input="seekAudio" />
-      <span>{{ formatTime(duration) }}</span>
-    </div>
+      <!-- Song Information -->
+      <div class="song-info">
+        <h3 class="song-title">{{ currentTrack.title }}</h3>
+        <p class="song-artist">{{ currentTrack.artist }}</p>
+      </div>
 
-    <div class="controls">
-      <button @click="prevTrack">⏮</button>
-      <button @click="togglePlay">{{ isPlaying ? '⏸' : '▶️' }}</button>
-      <button @click="nextTrack">⏭</button>
-      <button :class="{ active: isShuffle }" @click="toggleShuffle">🔀</button>
-      <button :class="{ active: isRepeating }" @click="toggleRepeat">🔁</button>
-    </div>
+      <!-- Progress Bar -->
+      <div class="progress-container" @click="seekAudio">
+        <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
+      </div>
+      <div class="time-display">
+        <span>{{ formatTime(currentTime) }}</span>
+        <span>{{ formatTime(duration) }}</span>
+      </div>
 
-    <div class="volume-control">
-      🔉
-      <input type="range" min="0" max="1" step="0.01" v-model="volume" @input="changeVolume" />
-    </div>
+      <!-- Playback Controls -->
+      <div class="controls">
+        <button class="control-btn" @click="prevTrack" title="Previous">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+        </button>
+        <button class="control-btn play-pause-btn" @click="togglePlay">
+          <svg v-if="!isPlaying" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+        </button>
+        <button class="control-btn" @click="nextTrack" title="Next">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+        </button>
+      </div>
 
+      <!-- Secondary Controls -->
+      <div class="secondary-controls">
+          <button :class="['control-btn', 'small-btn', { 'active': isRepeating }]" @click="toggleRepeat" title="Repeat">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+          </button>
+          <div class="volume-control">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <input type="range" min="0" max="1" step="0.01" v-model="volume" @input="changeVolume" />
+          </div>
+          <button :class="['control-btn', 'small-btn', { 'active': isShuffle }]" @click="toggleShuffle" title="Shuffle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="16 17 21 17 21 22"></polyline><line x1="4" y1="14" x2="11" y2="7"></line></svg>
+          </button>
+      </div>
+    </template>
+
+    <!-- Hidden Audio Element -->
     <audio
       ref="audioRef"
       :src="currentTrack.url"
@@ -39,193 +69,299 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import apiService from '@/services/apiService'
+import { ref, computed, onMounted, nextTick } from 'vue';
+import apiService from '@/services/apiService';
 
-const audioRef = ref(null)
-const playlist = ref([])
-const defaultCover = 'https://cdn-images.dzcdn.net/images/cover/6db53b3b17d014f11327e915cd3f984b/1900x1900-000000-80-0-0.jpg'
-const activeIndex = ref(0)
+// --- Refs and State ---
+const audioRef = ref(null);
+const playlist = ref([]);
+const error = ref(null);
+const defaultCover = 'https://placehold.co/300x300/e0e0e0/757575?text=Music';
+const activeIndex = ref(0);
 
-const isPlaying = ref(false)
-const isShuffle = ref(false)
-const isRepeating = ref(false)
-const currentTime = ref(0)
-const duration = ref(0)
-const seek = ref(0)
-const volume = ref(Number(localStorage.getItem('music-volume')) || 0.7)
+const isPlaying = ref(false);
+const isShuffle = ref(false);
+const isRepeating = ref(false);
+const currentTime = ref(0);
+const duration = ref(0);
+const volume = ref(Number(localStorage.getItem('music-volume')) || 0.7);
 
-const currentTrack = computed(() => playlist.value[activeIndex.value] || {})
+// --- Computed Properties ---
+const currentTrack = computed(() => playlist.value[activeIndex.value] || {});
+const progressBarWidth = computed(() => {
+  if (duration.value === 0) return '0%';
+  return `${(currentTime.value / duration.value) * 100}%`;
+});
 
-// Fetch playlist from backend
+// --- API Fetching ---
 async function fetchPlaylist() {
   try {
-    const res = await apiService.get('/sc/my-music') // ❗ Customize URL to your backend music endpoint
-    playlist.value = res.data.tracks || []
-    activeIndex.value = 0
+    const res = await apiService.get('/sc/my-music');
+    if (!res.data.tracks || res.data.tracks.length === 0) {
+        throw new Error("No tracks found in the playlist.");
+    }
+    playlist.value = res.data.tracks;
+    activeIndex.value = 0;
   } catch (err) {
-    console.error('🔴 Failed to fetch playlist:', err)
+    console.error('🔴 Failed to fetch playlist:', err);
+    error.value = err.message || "Could not connect to the server.";
   }
 }
 
-// Playback Controls
-async function togglePlay() {
-  const audio = audioRef.value
-  if (!audio) return
+// --- Playback Methods ---
+const playSong = async () => {
   try {
-    if (isPlaying.value) {
-      audio.pause()
-    } else {
-      await audio.play()
-    }
-    isPlaying.value = !isPlaying.value
+    await audioRef.value.play();
+    isPlaying.value = true;
   } catch (err) {
-    console.warn('❌ Autoplay blocked or play failed:', err.message)
+    console.warn('❌ Autoplay was prevented:', err.message);
+    isPlaying.value = false; // Ensure state is correct if play fails
   }
-}
+};
 
-function nextTrack() {
-  if (isShuffle.value) {
-    let next = Math.floor(Math.random() * playlist.value.length)
-    while (next === activeIndex.value && playlist.value.length > 1) {
-      next = Math.floor(Math.random() * playlist.value.length)
-    }
-    activeIndex.value = next
+const pauseSong = () => {
+  audioRef.value.pause();
+  isPlaying.value = false;
+};
+
+const togglePlay = () => {
+  if (isPlaying.value) {
+    pauseSong();
   } else {
-    activeIndex.value = (activeIndex.value + 1) % playlist.value.length
+    playSong();
   }
-  resetAndPlay()
-}
+};
 
-function prevTrack() {
-  activeIndex.value =
-    activeIndex.value === 0 ? playlist.value.length - 1 : activeIndex.value - 1
-  resetAndPlay()
-}
-
-// Helpers
-function resetAndPlay() {
-  const audio = audioRef.value
-  if (!audio) return
-  audio.pause()
-  audio.currentTime = 0
+const resetAndPlay = () => {
   nextTick(() => {
     if (isPlaying.value) {
-      audio.play().catch(err => console.warn('▶️ Autoplay failed:', err.message))
+      playSong();
     }
-  })
-}
+  });
+};
 
-function updateTime() {
-  const audio = audioRef.value
-  if (audio) {
-    currentTime.value = audio.currentTime
-    seek.value = currentTime.value
-  }
-}
-function setDuration() {
-  const audio = audioRef.value
-  if (audio) {
-    duration.value = audio.duration || 0
-  }
-}
-function seekAudio() {
-  if (audioRef.value) {
-    audioRef.value.currentTime = seek.value
-  }
-}
-function changeVolume() {
-  const audio = audioRef.value
-  if (audio) {
-    audio.volume = volume.value
-    localStorage.setItem('music-volume', volume.value)
-  }
-}
-function formatTime(seconds) {
-  if (!seconds || isNaN(seconds)) return '00:00'
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-}
-function toggleShuffle() {
-  isShuffle.value = !isShuffle.value
-}
-function toggleRepeat() {
-  isRepeating.value = !isRepeating.value
-}
-
-function handleTrackEnd() {
-  if (isRepeating.value) {
-    resetAndPlay()
+const nextTrack = () => {
+  if (isShuffle.value) {
+    let next = Math.floor(Math.random() * playlist.value.length);
+    while (next === activeIndex.value && playlist.value.length > 1) {
+      next = Math.floor(Math.random() * playlist.value.length);
+    }
+    activeIndex.value = next;
   } else {
-    nextTrack()
+    activeIndex.value = (activeIndex.value + 1) % playlist.value.length;
   }
-}
+  resetAndPlay();
+};
 
-// Mount
+const prevTrack = () => {
+  activeIndex.value = (activeIndex.value - 1 + playlist.value.length) % playlist.value.length;
+  resetAndPlay();
+};
+
+const handleTrackEnd = () => {
+  if (isRepeating.value) {
+    audioRef.value.currentTime = 0;
+    playSong();
+  } else {
+    nextTrack();
+  }
+};
+
+// --- Event Handlers ---
+const updateTime = () => {
+  if (audioRef.value) {
+    currentTime.value = audioRef.value.currentTime;
+  }
+};
+
+const setDuration = () => {
+  if (audioRef.value) {
+    duration.value = audioRef.value.duration || 0;
+  }
+};
+
+const seekAudio = (e) => {
+  if (!duration.value) return;
+  const progressContainer = e.currentTarget;
+  const clickX = e.offsetX;
+  const width = progressContainer.clientWidth;
+  audioRef.value.currentTime = (clickX / width) * duration.value;
+};
+
+const changeVolume = () => {
+  if (audioRef.value) {
+    audioRef.value.volume = volume.value;
+    localStorage.setItem('music-volume', String(volume.value));
+  }
+};
+
+// --- Utility & Lifecycle ---
+const formatTime = (seconds) => {
+  if (!seconds || isNaN(seconds)) return '0:00';
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${minutes}:${String(secs).padStart(2, '0')}`;
+};
+
+const toggleShuffle = () => { isShuffle.value = !isShuffle.value; };
+const toggleRepeat = () => { isRepeating.value = !isRepeating.value; };
+
 onMounted(async () => {
-  await fetchPlaylist()
-  const savedVolume = localStorage.getItem('music-volume')
-  if (savedVolume) volume.value = Number(savedVolume)
-  changeVolume()
-})
+  await fetchPlaylist();
+  if (audioRef.value) {
+    audioRef.value.volume = volume.value;
+  }
+});
 </script>
 
 <style scoped>
-.music-player {
-  background: #fff;
+.music-player-card {
+  background-color: #ffffff;
   border-radius: 16px;
   padding: 1.5rem;
-  max-width: 500px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-.cover img {
-  width: 180px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 16px;
-}
-.track-info {
   text-align: center;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
+
+.error-state {
+    padding: 2rem;
+    color: #721c24;
+    background-color: #f8d7da;
+    border-radius: 8px;
+}
+.error-message {
+    font-size: 0.9rem;
+    color: #842029;
+}
+
+.album-art-container {
+  margin-bottom: 1.5rem;
+}
+
+.album-art {
+  width: 150px;
+  height: 150px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.album-art.playing {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.song-info {
+  margin-bottom: 1rem;
+}
+
 .song-title {
-  font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
 }
+
 .song-artist {
-  color: #555;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0;
 }
+
+.progress-container {
+  background-color: #e9ecef;
+  border-radius: 5px;
+  height: 6px;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+  background-color: #4a148c;
+  border-radius: 5px;
+  height: 100%;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
 .controls {
   display: flex;
-  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
 }
-.controls button {
-  font-size: 1.3rem;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
+
+.control-btn {
+  background: none;
   border: none;
-  border-radius: 8px;
-  background-color: #f1f1f1;
-  transition: all 0.2s;
-}
-.controls button.active {
-  background-color: #8bc34a;
-  color: white;
-}
-.volume-control, .time-display {
+  cursor: pointer;
+  color: #4a148c;
+  padding: 0;
   display: flex;
   align-items: center;
-  width: 90%;
-  gap: 0.5rem;
+  justify-content: center;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
+.control-btn:hover {
+  transform: scale(1.1);
+}
+.control-btn.active {
+    color: #8a2be2; /* A brighter purple for active state */
+}
+
+.play-pause-btn {
+  background-color: #f3e8fd;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+}
+.play-pause-btn:hover {
+    background-color: #e9d5ff;
+}
+
+.secondary-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.small-btn {
+    color: #999;
+}
+.small-btn:hover {
+    color: #4a148c;
+}
+.small-btn.active {
+    color: #8a2be2;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-grow: 1;
+    margin: 0 1rem;
+    color: #6c757d;
+}
+
 input[type='range'] {
   flex-grow: 1;
-  accent-color: #2196f3;
+  accent-color: #8a2be2;
+  height: 4px;
 }
 </style>
