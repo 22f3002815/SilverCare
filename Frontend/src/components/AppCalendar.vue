@@ -34,9 +34,19 @@
         <div class="cell-label">{{ day.label }}</div>
         <div class="cell-data">
           <template v-if="day.medicationData">
-            <span class="taken">✅ {{ day.medicationData.taken || 0 }}</span>
-            <span class="missed">❌ {{ day.medicationData.missed || 0 }}</span>
-            </template>
+            <div class="status-indicator taken">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+              </svg>
+              <span>{{ day.medicationData.taken || 0 }}</span>
+            </div>
+            <div class="status-indicator missed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+              <span>{{ day.medicationData.missed || 0 }}</span>
+            </div>
+          </template>
           <template v-else>
             <span class="future-placeholder">-</span>
           </template>
@@ -47,6 +57,7 @@
 </template>
 
 <script setup>
+// (The <script setup> block remains unchanged from the previous version)
 import { ref, onMounted, watch } from 'vue';
 import medicationService from '@/services/calendar.js';
 import apiService from '@/services/apiService.js';
@@ -66,7 +77,6 @@ const monthNames = [
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 async function loadDependents() {
-  console.log("Loading dependents...");
   try {
     const response = await apiService.get('/sc/my-dependents');
     dependents.value = response.data.dependents.map(dep => ({
@@ -84,11 +94,9 @@ async function loadDependents() {
 async function loadCalendarData() {
   try {
     if (!selectedDependent.value) {
-      console.log('No dependent selected. Skipping API call.');
       calendarData.value = [];
       return;
     }
-    console.log(`Making API call for: Dependent ID ${selectedDependent.value}, Month: ${currentMonth.value}, Year: ${currentYear.value}`);
     calendarData.value = await medicationService.generateCalendarData(currentMonth.value, currentYear.value, selectedDependent.value);
   } catch (error) {
     console.error('Failed to load calendar data:', error);
@@ -134,19 +142,18 @@ watch([currentMonth, currentYear, selectedDependent], () => {
 </script>
 
 <style scoped>
-/* Base container for the whole calendar */
+/* (The <style> block is the one that has major changes. The rest is the same) */
 .calendar-wrapper {
   padding: 1.5rem;
-  background-color: #f8f9fa; /* Lighter background */
+  background-color: #f8f9fa;
   border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); /* Softer, more pronounced shadow */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #343a40; /* Darker text for better contrast */
+  color: #343a40;
   max-width: 600px;
   margin: 2rem auto;
 }
 
-/* Header styling for month and year navigation */
 .calendar-header {
   display: flex;
   justify-content: space-between;
@@ -161,14 +168,14 @@ watch([currentMonth, currentYear, selectedDependent], () => {
   background: none;
   border: none;
   cursor: pointer;
-  color: #007bff; /* Primary blue color */
+  color: #007bff;
   transition: transform 0.2s ease, color 0.2s ease;
   padding: 0 10px;
 }
 
 .arrow-button:hover {
   transform: scale(1.2);
-  color: #0056b3; /* Darker blue on hover */
+  color: #0056b3;
 }
 
 .calendar-title {
@@ -178,7 +185,6 @@ watch([currentMonth, currentYear, selectedDependent], () => {
   text-transform: capitalize;
 }
 
-/* Toggle buttons for dependents */
 .toggle-buttons {
   display: flex;
   justify-content: center;
@@ -205,7 +211,6 @@ watch([currentMonth, currentYear, selectedDependent], () => {
   box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
 }
 
-/* Weekday row styling */
 .weekday-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -216,14 +221,12 @@ watch([currentMonth, currentYear, selectedDependent], () => {
   font-size: 0.9rem;
 }
 
-/* Main calendar grid layout */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
 }
 
-/* Individual calendar cells */
 .calendar-cell {
   background-color: #ffffff;
   border-radius: 12px;
@@ -231,7 +234,7 @@ watch([currentMonth, currentYear, selectedDependent], () => {
   text-align: center;
   border: 1px solid #e9ecef;
   font-size: 0.9rem;
-  min-height: 80px; /* Ensure a consistent height for cells */
+  min-height: 80px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -243,7 +246,6 @@ watch([currentMonth, currentYear, selectedDependent], () => {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* State-based cell styling */
 .calendar-cell.today {
   border: 2px solid #007bff;
   background-color: #e6f7ff;
@@ -259,7 +261,6 @@ watch([currentMonth, currentYear, selectedDependent], () => {
   background-color: #ffffff;
 }
 
-/* Cell content styling */
 .cell-label {
   font-weight: bold;
   font-size: 1.1rem;
@@ -275,19 +276,41 @@ watch([currentMonth, currentYear, selectedDependent], () => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  margin-top: auto; /* Pushes content to the bottom */
+  margin-top: auto;
 }
 
-/* Status icon colors and alignment */
-.taken, .missed {
+/* New and Updated Styles for Status Indicators */
+.status-indicator {
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.85rem;
   font-weight: 600;
+  gap: 4px; /* Space between icon and text */
 }
 
-.taken { color: #28a745; } /* Green */
-.missed { color: #dc3545; } /* Red */
+/* SVG icon styling */
+.status-indicator svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
+.taken {
+  color: #28a745; /* green */
+}
+
+.taken svg {
+  fill: #28a745;
+}
+
+.missed {
+  color: #dc3545; /* red */
+}
+
+.missed svg {
+  fill: #dc3545;
+}
 </style>
