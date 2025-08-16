@@ -3,11 +3,7 @@
     <Navbar />
     <header class="dashboard-header">
       <div class="header-left">
-        <h1>Health at a Glance</h1>
-        <p v-if="role === 'care_giver' && members.length > 0">
-          Viewing stats for: <strong>{{ current }}</strong>
-        </p>
-        <p v-else>Your personal health and medication overview.</p>
+        <h1>Health at a Glance</h1>       
       </div>
       <div class="header-right">
         <div class="digital-clock">{{ currentTime }}</div>
@@ -15,12 +11,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 18h16M4 6h16"/></svg>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 18h16M4 6h16"/></svg>
         </button>
-        <button class="assign-btn" @click="showAddMedicineModal = true">
-          Assign Medicine
-        </button>
-        <button class="sos-button" @click="sendSOS" :disabled="sosLoading">
-          {{ sosLoading ? '...' : 'SOS' }}
-        </button>
+        
       </div>
     </header>
 
@@ -95,7 +86,6 @@ const currentTime = ref('');
 let clockInterval = null;
 const fontSizeLevel = ref(0);
 const showAddMedicineModal = ref(false);
-const sosLoading = ref(false);
 
 // --- Alert State ---
 const alertMessage = ref('');
@@ -113,10 +103,7 @@ function cycleFontSize() {
   fontSizeLevel.value = (fontSizeLevel.value + 1) % 3;
 }
 
-function showAlert(message, type = 'error') {
-  alertMessage.value = message;
-  alertType.value = type;
-}
+
 
 function updateTime() {
     currentTime.value = new Date().toLocaleTimeString('en-US', {
@@ -243,28 +230,6 @@ async function fetchAllStats() {
   }
 }
 
-async function sendSOS() {
-  sosLoading.value = true
-  try {
-    const res = await fetch('http://localhost:5000/sc/send-sos', {
-        method: 'POST',
-        headers:{ 'Authorization':`Bearer ${token}` }
-    });
-    const data = await res.json();
-    if (res.ok && data.status === 'SOS sent successfully') {
-      showAlert('SOS Alert sent to your caregivers.', 'success')
-    } else {
-      showAlert(data.message || 'Could not send SOS alert.', 'error')
-    }
-  } catch (err) {
-    showAlert('Failed to send SOS alert.', 'error')
-  } finally {
-    sosLoading.value = false
-    setTimeout(() => {
-      alertMessage.value = ''
-    }, 4000)
-  }
-}
 
 onMounted(() => {
   fetchAllStats();
