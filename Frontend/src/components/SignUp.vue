@@ -1,61 +1,63 @@
 <template>
   <div class="signup-page">
     <Navbar />
-
     <div class="overlay">
       <div class="glass-container">
         <!-- Branding text like login page -->
         <div class="branding-text">
           <h1>SilverCare</h1>
-          <p>Never Miss a Dose, Never Miss a Moment</p>
+          <p>Never Miss a Dose, Never Miss a Moment.</p>
         </div>
 
         <!-- Form -->
         <div class="form-container">
-          <h1>Sign Up</h1>
+          <h2 class="form-title">Create Account</h2>
           <form @submit.prevent="handleSubmit">
+            <!-- First & Last Name on same line -->
+            <div class="form-row">
+              <div class="input-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" v-model="first_name" placeholder="Enter your First Name" required />
+              </div>
+              <div class="input-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" v-model="last_name" placeholder="Enter your Last Name" required />
+              </div>
+            </div>
 
-    <!-- First & Last Name on same line -->
-    <div class="form-row">
-      <div>
-        <label for="first_name">First Name</label>
-        <input type="text" id="first_name" v-model="first_name" placeholder="Enter your First Name" required />
-      </div>
-      <div>
-        <label for="last_name">Last Name</label>
-        <input type="text" id="last_name" v-model="last_name" placeholder="Enter your Last Name" required />
-      </div>
-    </div>
+            <div class="input-group">
+              <label for="username">Username</label>
+              <input type="text" id="username" v-model="username" placeholder="Enter a username" required />
+            </div>
 
-    <label for="username">Username</label>
-    <input type="text" id="username" v-model="username" placeholder="Enter a username" required />
+            <!-- Password & Confirm Password on same line -->
+            <div class="form-row">
+              <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" v-model="password" placeholder="Enter a password" required />
+              </div>
+              <div class="input-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" v-model="confirm_password" placeholder="Confirm password" required />
+              </div>
+            </div>
 
-    <!-- Password & Confirm Password on same line -->
-    <div class="form-row">
-      <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" v-model="password" placeholder="Enter a password" required />
-      </div>
-      <div>
-        <label for="confirm_password">Confirm Password</label>
-        <input type="password" id="confirm_password" v-model="confirm_password" placeholder="Confirm password" required />
-      </div>
-    </div>
+            <div class="input-group">
+              <label for="role">Role</label>
+              <select id="role" v-model="role" required>
+                <option disabled value="">Select Role</option>
+                <option value="care_giver">Care Giver</option>
+                <option value="senior_citizen">Dependent</option>
+              </select>
+            </div>
 
-    <label for="role">Role</label>
-    <select id="role" v-model="role" required>
-      <option value="">Select Role</option>
-      <option value="care_giver">Care Giver</option>
-      <option value="senior_citizen">Dependent</option>
-    </select>
+            <button type="submit" class="register-btn">Register</button>
+          </form>
 
-    <button type="submit">Register</button>
-  </form>
+          <p v-if="message" class="message" :class="{ error: !success, success: success }">{{ message }}</p>
 
-          <p v-if="message" :class="{ error: !success, success: success }">{{ message }}</p>
-
-          <div class="mt-2">
-            <span style="color: white;">
+          <div class="login-link">
+            <span>
               Already have an account?
               <a href="/login">Login here</a>
             </span>
@@ -141,20 +143,12 @@ export default {
   width: 100%;
   margin: 0;
   padding: 0;
-  background: url("https://media.swncdn.com/via/16464-happy-senior-mature-dad-hugging-prodigal-adul.jpg")
-    no-repeat center center;
+  background: url("https://media.swncdn.com/via/16464-happy-senior-mature-dad-hugging-prodigal-adul.jpg") no-repeat center center;
   background-size: cover;
   position: relative;
   display: flex;
   flex-direction: column;
-}
-
-.signup-page::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 0;
+  font-family: 'Inter', sans-serif;
 }
 
 .overlay {
@@ -162,104 +156,143 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-  z-index: 1;
+  background: rgba(0, 0, 0, 0.4);
+  padding-top: 60px; /* Offset for navbar */
 }
 
 .glass-container {
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border-radius: 20px;
-  padding: 2.5rem;
-  width: 400px;
-  max-width: 92vw;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2rem 2.5rem;
+  width: 100%;
+  max-width: 550px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   text-align: center;
-  height: 700px; 
+  color: white;
 }
 
 .branding-text h1 {
-  font-size: 3rem;
+  font-family: 'Georgia', serif;
+  font-size: calc(2.5rem * var(--font-scale));
   font-weight: bold;
   margin-bottom: 0.3rem;
-  color: #fff5b0;
+  color: #ffffff;
 }
+
 .branding-text p {
-  font-size: 1.2rem;
+  font-size: calc(1rem * var(--font-scale));
   font-style: italic;
-  color: #ffffffcc;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 1.5rem;
 }
 
-.form-container h1 {
-  color: white;
+.form-container .form-title {
+  font-size: calc(1.5rem * var(--font-scale));
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.input-group {
   margin-bottom: 1rem;
 }
 
 label {
   display: block;
-  margin: 0.5rem 0 0.2rem;
-  font-weight: bold;
-  color: white;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: calc(0.9rem * var(--font-scale));
   text-align: left;
 }
 
 input,
 select {
   width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-  border-radius: 5px;
-  border: none;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.15);
   color: white;
+  font-size: calc(1rem * var(--font-scale));
 }
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
 input::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27292.4%27%20height%3D%27292.4%27%3E%3Cpath%20fill%3D%27%23ffffff%27%20d%3D%27M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%27%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 0.65em auto;
+}
+
 select option {
-  color: #333;
-}
-
-button {
-  width: 100%;
-  padding: 0.6rem;
-  background-color: #4caf50;
+  background-color: #333;
   color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-button:hover {
-  background-color: #388e3c;
 }
 
-p.success {
-  color: lightgreen;
+.register-btn {
+  width: 100%;
+  padding: 0.9rem;
+  background-color: #28a745;
+  color: white;
+  font-weight: 600;
+  font-size: calc(1rem * var(--font-scale));
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 1rem;
 }
-p.error {
-  color: #ff6b6b;
+
+.register-btn:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+}
+
+.message {
+  margin-top: 1rem;
+  font-size: calc(0.9rem * var(--font-scale));
+}
+.message.success {
+  color: #a7f3d0;
+}
+.message.error {
+  color: #fca5a5;
 }
 
 .form-row {
   display: flex;
-  gap: 20px; /* space between the two fields */
+  gap: 1.25rem;
 }
 
 .form-row > div {
-  flex: 1; /* makes both fields equal width */
+  flex: 1;
 }
-.form-container a {
-  color: #00bfff; /* bright cyan for contrast */
-  font-weight: bold;
+
+.login-link {
+  margin-top: 1.5rem;
+  font-size: calc(0.9rem * var(--font-scale));
+}
+.login-link a {
+  color: #93c5fd;
+  font-weight: 600;
+  text-decoration: none;
+}
+.login-link a:hover {
   text-decoration: underline;
 }
-
-.form-container a:hover {
-  color: #1ec8ff; /* lighter on hover */
-  text-decoration: none; /* optional: remove underline on hover */
-}
-
 </style>
