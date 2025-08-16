@@ -1,44 +1,47 @@
 <template>
   <div class="login-page">
     <Navbar />
-
-    <div class="overlay">
+    <div class="login-overlay">
       <div class="glass-container">
         <div class="branding-text">
           <h1>SilverCare</h1>
-          <p>Never Miss a Dose, Never Miss a Moment</p>
+          <p>Never Miss a Dose, Never Miss a Moment.</p>
         </div>
 
         <div class="form-container">
-          <h1>Login</h1>
+          <h2 class="form-title">Login</h2>
           <form @submit.prevent="handleSubmit">
-            <label for="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              v-model="username"
-              placeholder="Enter your username"
-              required
-            />
+            <div class="input-group">
+              <label for="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                v-model="username"
+                placeholder="Enter your username"
+                required
+              />
+            </div>
+            
+            <div class="input-group">
+              <label for="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                v-model="password"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
 
-            <label for="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              v-model="password"
-              placeholder="Enter your password"
-              required
-            />
-
-            <button type="submit">Login</button>
+            <button type="submit" class="login-btn">Login</button>
           </form>
 
-          <p v-if="message" :class="{ error: !success, success: success }">
+          <p v-if="message" class="message" :class="{ error: !success, success: success }">
             {{ message }}
           </p>
 
-          <div class="mt-2">
-            <span style="color:white" >
+          <div class="signup-link">
+            <span>
               Not yet registered? <a href="/signup">Click here</a>
             </span>
           </div>
@@ -127,112 +130,123 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
+  font-family: 'Inter', sans-serif;
 }
 
-/* Black overlay over entire background */
-.login-page::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3); /* Adjust for more/less darkness */
-  z-index: 0;
-}
-
-.overlay {
+.login-overlay {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative; /* keeps it above overlay */
-  z-index: 1;
+  background: rgba(0, 0, 0, 0.4); /* Darkening overlay */
+  padding-top: 60px; /* Offset for navbar */
 }
 
 .glass-container {
-  background: rgba(0, 0, 0, 0.35); /* Dark tint */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border-radius: 20px;
-  padding: 2.5rem;
-  width: 400px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2.5rem 3rem;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   text-align: center;
+  color: white;
 }
 
-/* Branding text inside glass */
 .branding-text h1 {
-  font-size: 3rem;
+  font-family: 'Georgia', serif;
+  font-size: calc(3rem * var(--font-scale));
   font-weight: bold;
-  margin-bottom: 0.3rem;
-  color: #fff5b0;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
 }
 
 .branding-text p {
-  font-size: 1.2rem;
+  font-size: calc(1.1rem * var(--font-scale));
   font-style: italic;
-  color: #ffffffcc;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+}
+
+.form-container .form-title {
+  font-size: calc(1.8rem * var(--font-scale));
+  font-weight: 600;
   margin-bottom: 1.5rem;
 }
 
-/* Form styling inside glass */
-.form-container h1 {
-  color: white;
-  margin-bottom: 1rem;
+.input-group {
+  margin-bottom: 1.25rem;
 }
 
 label {
   display: block;
-  margin: 0.5rem 0 0.2rem;
-  font-weight: bold;
-  color: white;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: calc(0.9rem * var(--font-scale));
   text-align: left;
 }
 
 input {
   width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-  border-radius: 5px;
-  border: none;
-  background: rgba(255, 255, 255, 0.15); /* Slightly translucent */
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
+  font-size: calc(1rem * var(--font-scale));
 }
-
+input:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
 input::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
 
-button {
+.login-btn {
   width: 100%;
-  padding: 0.6rem;
-  background-color: #4caf50;
+  padding: 0.9rem;
+  background-color: #007bff;
   color: white;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: calc(1rem * var(--font-scale));
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 1rem;
 }
 
-button:hover {
-  background-color: #388e3c;
+.login-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
-/* Message styles */
-p.success {
-  color: lightgreen;
+.message {
+  margin-top: 1rem;
+  font-size: calc(0.9rem * var(--font-scale));
+}
+.message.success {
+  color: #a7f3d0;
+}
+.message.error {
+  color: #fca5a5;
 }
 
-p.error {
-  color: #ff6b6b;
+.signup-link {
+  margin-top: 1.5rem;
+  font-size: calc(0.9rem * var(--font-scale));
 }
-.form-container a {
-  color: #00bfff; /* bright cyan for contrast */
-  font-weight: bold;
+.signup-link a {
+  color: #93c5fd;
+  font-weight: 600;
+  text-decoration: none;
+}
+.signup-link a:hover {
   text-decoration: underline;
 }
-
-.form-container a:hover {
-  color: #1ec8ff; /* lighter on hover */
-  text-decoration: none; /* optional: remove underline on hover */
-}
-
 </style>
