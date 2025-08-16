@@ -1,29 +1,7 @@
 <template>
   <div class="landing-wrapper">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg fixed-top custom-navbar px-lg-5 py-3">
-      <a class="navbar-brand" href="#">SilverCare<span>.</span></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#features">Features</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#about">About</a>
-          </li>
-           <li class="nav-item">
-            <a class="nav-link" href="#contact">Contact</a>
-          </li>
-        </ul>
-        <div class="d-flex gap-2 ms-lg-4">
-          <router-link to="/login" class="btn btn-outline">Login</router-link>
-          <router-link to="/signup" class="btn btn-primary">Get Started</router-link>
-        </div>
-      </div>
-    </nav>
+    <Navbar :is-landing-page="true" />
 
     <!-- Hero Section -->
     <section class="hero-section d-flex align-items-center text-white">
@@ -32,8 +10,8 @@
         <p class="hero-subtitle">
           Connecting you with skilled, compassionate providers for a better quality of life.
         </p>
-        <router-link to="/signup" class="btn btn-primary btn-lg mt-4">
-          Find Care Today
+        <router-link to="/signup" class="btn btn-primary btn-lg mt-4 hero-btn">
+          Get Started
         </router-link>
       </div>
     </section>
@@ -80,13 +58,14 @@
     <!-- About Section -->
     <section id="about" class="about-section">
       <div class="container">
-        <div class="row align-items-center">
+        <div class="row align-items-center g-5">
           <div class="col-lg-6">
-            <img src="https://images.unsplash.com/photo-1576765608866-5b510410c1e8?q=80&w=600&auto=format&fit=crop" class="img-fluid rounded-3" alt="Happy senior citizen">
+            <!-- Image Changed -->
+            <img src="https://imgs.search.brave.com/gdccOe-m0kv9VdqMmdxtlB8MZS25AwI3gDdafv-9Q-M/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMudmVjdGVlenku/Y29tL3N5c3RlbS9y/ZXNvdXJjZXMvdGh1/bWJuYWlscy8wNDkv/NjQyLzcyOS9zbWFs/bC9hbi1vbGRlci1j/b3VwbGUtYW5kLXRo/ZWlyLWdyYW5kY2hp/bGRyZW4tYXJlLXNt/aWxpbmctZnJlZS12/aWRlby5qcGc" class="img-fluid rounded-3 shadow-lg" alt="Caregiver and senior woman smiling together">
           </div>
           <div class="col-lg-6">
             <h2 class="section-title">Dedicated to a Life of Comfort and Dignity</h2>
-            <p class="text-secondary">We are dedicated to providing the highest level of care to the elderly, ensuring their comfort, and independence. Our team of professionals is trained to handle a wide range of needs with compassion and respect.</p>
+            <p class="about-text">We are dedicated to providing the highest level of care to the elderly, ensuring their comfort, and independence. Our team of professionals is trained to handle a wide range of needs with compassion and respect.</p>
           </div>
         </div>
       </div>
@@ -121,39 +100,22 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue';
-
-const handleScroll = () => {
-  const navbar = document.querySelector('.custom-navbar');
-  if (window.scrollY > 50) {
-    navbar.classList.add('scrolled');
-  } else {
-    navbar.classList.remove('scrolled');
-  }
-};
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
-});
+import Navbar from '@/components/Navbar.vue';
 </script>
 
 <style scoped>
 /* --- Font Import --- */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Georgia&display=swap');
 
 /* --- CSS Variables for Theming --- */
 :root {
-  --font-primary: 'Poppins', sans-serif;
-  --primary-color: #005a9c; /* A deep, trustworthy blue */
-  --secondary-color: #f8f9fa;
+  --font-primary: 'Inter', sans-serif;
+  --font-secondary: 'Georgia', serif;
+  --primary-color: #0d6efd; /* Bootstrap Blue for consistency */
+  --primary-hover-color: #0b5ed7;
   --text-dark: #212529;
   --text-light: #ffffff;
   --text-muted: #6c757d;
-  --border-color: #dee2e6;
   --shadow-sm: 0 4px 6px rgba(0,0,0,0.05);
   --border-radius: 12px;
 }
@@ -166,78 +128,6 @@ onUnmounted(() => {
   background-color: #fff;
 }
 
-/* --- Navigation Bar --- */
-.custom-navbar {
-  transition: background-color 0.4s ease, padding 0.4s ease;
-}
-.custom-navbar.scrolled {
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  box-shadow: var(--shadow-sm);
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-.custom-navbar.scrolled .navbar-brand,
-.custom-navbar.scrolled .nav-link {
-  color: var(--text-dark) !important;
-}
-.custom-navbar.scrolled .navbar-brand span {
-  color: var(--primary-color) !important;
-}
-.custom-navbar.scrolled .btn-outline {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-.custom-navbar.scrolled .btn-outline:hover {
-  background-color: var(--primary-color);
-  color: var(--text-light);
-}
-
-.navbar-brand {
-  font-weight: 700;
-  font-size: 1.75rem;
-  color: var(--text-light);
-}
-.navbar-brand span {
-  color: var(--primary-color);
-}
-.nav-link {
-  font-weight: 500;
-  color: var(--text-light);
-  transition: color 0.3s ease;
-}
-.nav-link:hover {
-  color: var(--primary-color);
-}
-.custom-navbar.scrolled .nav-link:hover {
-  color: var(--primary-color) !important;
-}
-
-/* --- Buttons --- */
-.btn {
-  padding: 0.6rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-.btn-primary {
-  background-color: var(--primary-color);
-  border: 1px solid var(--primary-color);
-  color: var(--text-light);
-}
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(0, 90, 156, 0.2);
-}
-.btn-outline {
-  border: 1px solid var(--text-light);
-  color: var(--text-light);
-}
-.btn-outline:hover {
-  background-color: var(--text-light);
-  color: var(--primary-color);
-}
-
 /* --- Hero Section --- */
 .hero-section {
   background: linear-gradient(rgba(0, 30, 60, 0.6), rgba(0, 30, 60, 0.6)), url('https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1920&auto=format&fit=crop');
@@ -245,17 +135,44 @@ onUnmounted(() => {
   background-position: center;
   height: 100vh;
   min-height: 700px;
+  padding-top: 80px;
 }
 .hero-title {
-  font-size: 3.5rem;
+  font-family: var(--font-secondary);
+  font-size: calc(4.8rem * var(--font-scale));
   font-weight: 700;
   line-height: 1.2;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 .hero-subtitle {
-  font-size: 1.25rem;
-  max-width: 650px;
-  margin: 1rem auto 0;
+  font-size: calc(1.4rem * var(--font-scale));
+  max-width: 700px;
+  margin: 1.5rem auto 0;
   opacity: 0.9;
+  line-height: 1.7;
+}
+
+/* --- Buttons --- */
+.btn {
+  padding: 0.75rem 2rem;
+  border-radius: 50px; /* Pill shape */
+  font-weight: 600;
+  font-size: calc(1rem * var(--font-scale));
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+.hero-btn.btn-primary {
+  background-color: 0 10px 20px rgba(31, 4, 237, 0.25);
+  border-color: var(--primary-color);
+  color: var(--text-light);
+  padding: 1rem 2.5rem;
+  font-size: calc(1.1rem * var(--font-scale));
+}
+.hero-btn.btn-primary:hover {
+  background-color: var(--primary-hover-color);
+  border-color: var(--primary-hover-color);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(13, 110, 253, 0.25);
 }
 
 /* --- General Section Styling --- */
@@ -263,12 +180,13 @@ onUnmounted(() => {
   padding: 6rem 0;
 }
 .section-title {
-  font-size: 2.5rem;
+  font-family: var(--font-secondary);
+  font-size: calc(3rem * var(--font-scale));
   font-weight: 700;
   margin-bottom: 1rem;
 }
 .section-subtitle {
-  font-size: 1.1rem;
+  font-size: calc(1.2rem * var(--font-scale));
   color: var(--text-muted);
   max-width: 600px;
   margin: 0 auto;
@@ -307,18 +225,21 @@ onUnmounted(() => {
     height: 28px;
 }
 .feature-card h3 {
-  font-size: 1.25rem;
+  font-size: calc(1.3rem * var(--font-scale));
   font-weight: 600;
   margin-bottom: 0.75rem;
 }
 .feature-card p {
   color: var(--text-muted);
-  font-size: 0.95rem;
+  font-size: calc(1rem * var(--font-scale));
+  line-height: 1.6;
 }
 
 /* --- About Section --- */
-.about-section img {
-    box-shadow: var(--shadow-sm);
+.about-text {
+  font-size: calc(1.15rem * var(--font-scale));
+  line-height: 1.8;
+  color: var(--text-muted);
 }
 
 /* --- Footer --- */
@@ -328,8 +249,9 @@ onUnmounted(() => {
   padding: 4rem 0;
 }
 .footer-brand {
+  font-family: var(--font-secondary);
   font-weight: 700;
-  font-size: 1.75rem;
+  font-size: calc(1.75rem * var(--font-scale));
   color: var(--text-light);
 }
 .footer-brand span {
@@ -338,30 +260,30 @@ onUnmounted(() => {
 .footer-heading {
   color: var(--text-light);
   font-weight: 600;
+  font-size: calc(1.1rem * var(--font-scale));
   margin-bottom: 1rem;
 }
 .footer .list-unstyled li {
   margin-bottom: 0.5rem;
+  font-size: calc(1rem * var(--font-scale));
 }
 
 /* --- Responsive Adjustments --- */
 @media (max-width: 991.98px) {
   .hero-title {
-    font-size: 2.5rem;
+    font-size: calc(3.5rem * var(--font-scale));
   }
-  .custom-navbar {
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-  }
-  .navbar-brand, .nav-link {
-    color: var(--text-dark) !important;
-  }
-  .navbar-brand span {
-    color: var(--primary-color) !important;
-  }
-  .btn-outline {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-  }
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: calc(2.8rem * var(--font-scale));
+    }
+    .hero-subtitle {
+        font-size: calc(1.2rem * var(--font-scale));
+    }
+    .section-title {
+        font-size: calc(2.2rem * var(--font-scale));
+    }
 }
 </style>
