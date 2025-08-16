@@ -1,5 +1,9 @@
 <template>
-  <div class="music-player-container">
+  <div
+    class="music-player-container"
+    :style="containerStyle"
+    @mousedown="startDragging"
+  >
     <audio
       ref="audioRef"
       :src="currentTrack.url"
@@ -91,7 +95,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue';
 import apiService from '@/services/apiService';
 
 // --- Refs and State ---
@@ -110,11 +114,48 @@ const currentTime = ref(0);
 const duration = ref(0);
 const volume = ref(Number(localStorage.getItem('music-volume')) || 0.7);
 
+// --- Draggable State ---
+const isDragging = ref(false);
+const initialX = ref(0);
+const initialY = ref(0);
+const offsetX = ref(0);
+const offsetY = ref(0);
+// Persist position in local storage
+const storedX = Number(localStorage.getItem('player-x')) || window.innerWidth - 370;
+const storedY = Number(localStorage.getItem('player-y')) || window.innerHeight - 100;
+
+const x = ref(storedX);
+const y = ref(storedY);
+
 // --- Computed Properties ---
 const currentTrack = computed(() => playlist.value[activeIndex.value] || {});
 const progressBarWidth = computed(() => {
   if (duration.value === 0) return '0%';
   return `${(currentTime.value / duration.value) * 100}%`;
+});
+
+const containerStyle = computed(() => {
+  const playerWidth = isCollapsed.value ? 350 : 300;
+  const horizontalPadding = isCollapsed.value ? 2 * 16 : 2 * 24;
+  const totalWidth = playerWidth + horizontalPadding;
+  
+  const playerHeight = isCollapsed.value ? 80 : 400; // Estimated expanded height
+  const verticalPadding = isCollapsed.value ? 2 * 8 : 2 * 24;
+  const totalHeight = playerHeight + verticalPadding;
+  
+  const clampedX = Math.max(0, Math.min(window.innerWidth - totalWidth, x.value));
+  const clampedY = Math.max(0, Math.min(window.innerHeight - totalHeight, y.value));
+
+  // Use CSS transform for positioning for better performance
+  return {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    transform: `translate(${clampedX}px, ${clampedY}px)`,
+    cursor: isDragging.value ? 'grabbing' : 'grab',
+    zIndex: 1000,
+    transition: 'transform 0.3s ease',
+  };
 });
 
 
@@ -227,6 +268,47 @@ const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value;
 };
 
+// --- Draggable Methods ---
+const startDragging = (e) => {
+  const tagName = e.target.tagName;
+  const preventDragTags = ['BUTTON', 'INPUT', 'SVG', 'PATH', 'RECT', 'POLYGON', 'LINE', 'H3', 'P', 'SPAN'];
+  if (preventDragTags.includes(tagName) || e.target.classList.contains('progress-container')) {
+    return;
+  }
+
+  isDragging.value = true;
+  initialX.value = e.clientX;
+  initialY.value = e.clientY;
+  offsetX.value = x.value - initialX.value;
+  offsetY.value = y.value - initialY.value;
+};
+
+const drag = (e) => {
+  if (isDragging.value) {
+    const newX = e.clientX + offsetX.value;
+    const newY = e.clientY + offsetY.value;
+    
+    const horizontalPadding = isCollapsed.value ? 2 * 16 : 2 * 24;
+    const playerWidth = (isCollapsed.value ? 350 : 300) + horizontalPadding;
+
+    const verticalPadding = isCollapsed.value ? 2 * 8 : 2 * 24;
+    const playerHeight = (isCollapsed.value ? 80 : 400) + verticalPadding;
+    
+    x.value = Math.max(0, Math.min(window.innerWidth - playerWidth, newX));
+    y.value = Math.max(0, Math.min(window.innerHeight - playerHeight, newY));
+
+    // Persist position to local storage
+    localStorage.setItem('player-x', x.value);
+    localStorage.setItem('player-y', y.value);
+    
+    e.preventDefault();
+  }
+};
+
+const stopDragging = () => {
+  isDragging.value = false;
+};
+
 // --- Utility & Lifecycle ---
 function formatTime(seconds) {
   if (!seconds || isNaN(seconds)) return '0:00';
@@ -240,35 +322,36 @@ onMounted(async () => {
   if (audioRef.value) {
     audioRef.value.volume = volume.value;
   }
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', stopDragging);
 });
 
-onMounted(() => {
-  // No dragging event listeners to remove
+onUnmounted(() => {
+  document.removeEventListener('mousemove', drag);
+  document.removeEventListener('mouseup', stopDragging);
 });
 </script>
 
 <style scoped>
-/*
- * Main container for the fixed-position music player
- */
+/* Main container for the fixed-position collapsed player */
 .music-player-container {
-  /* Position the element fixed in the viewport */
   position: fixed;
-  /* Set the default position to the bottom-right corner */
-  bottom: 20px;
-  left: 20px;
+  top: 0;
+  left: 0;
   z-index: 1000;
-  /* Remove any dragging-related cursor */
-  cursor: auto; 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  /* The transition helps when it snaps back into place on expand/collapse */
+  transition: transform 0.1s linear; 
 }
-/*
- * Expanded Player UI
- */
+
+/* Expanded Player UI */
 .music-player-card {
   position: relative;
   background-color: #ffffff;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: 1.5rem; /* This is 24px */
   text-align: center;
   color: #333;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -298,9 +381,7 @@ onMounted(() => {
   height: 28px;
 }
 
-/*
- * Collapsed Player UI
- */
+/* Collapsed Player UI */
 .music-player-collapsed {
   display: flex;
   justify-content: space-between;
@@ -309,7 +390,7 @@ onMounted(() => {
   height: 80px;
   background-color: #ffffff;
   border-radius: 12px;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem; /* 1rem is 16px, 0.5rem is 8px */
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   cursor: pointer;
   transition: all 0.3s ease;

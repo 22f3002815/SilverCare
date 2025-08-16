@@ -78,7 +78,7 @@
     <AddMedicineModal
       v-if="showAddMedModal"
       @close="closeAddMedModal"
-      @medication-added="refreshMedications"
+      @add-medication="handleAddMedication"
     />
     <EditMedicineModal
       v-if="showEditMedModal"
@@ -164,7 +164,6 @@ async function handleUpdateMedication(updatedData) {
     if (res.status === 200) {
       alert('Medication updated successfully.')
       closeEditMedModal()
-      refreshMedications(); // Refresh list
     }
   } catch (err) {
     console.error('Error updating medication:', err)
@@ -202,6 +201,43 @@ async function deleteMedicationMapping(medId) {
     return { success: false }
   }
 }
+async function addMedicationToDependent(userId, payload) {
+  try {
+    const userRole = sessionStorage.getItem('role');
+    const requestBody = { ...payload };
+    if (userRole === 'care_giver') {
+      requestBody.senior_citizen_id = Number(userId);
+    }
+
+    const res = await apiService.post(`/sc/assign-medicine`, requestBody);
+
+    console.log('🔍 API Response:', res.data);
+
+    // Debug check: log what you're actually testing
+    if (res.data && res.data.medication) {
+      console.log('✅ Medication found:', res.data.medication);
+      return {
+        success: true,
+        medication: res.data.medication,
+        message: res.data.message || 'Medicine assigned successfully.'
+      };
+    } else {
+      console.warn('⚠️ Medication not found in response');
+      return {
+        success: false,
+        message: res.data.message || 'Failed to assign medicine.'
+      };
+    }
+
+  } catch (err) {
+    console.error('❌ Error adding medication:', err.response?.data || err.message);
+    return {
+      success: false,
+      message: err.response?.data?.error || 'Failed to assign medicine.'
+    };
+  }
+}
+
 
 function openAddMedModal() {
   showAddMedModal.value = true
@@ -230,10 +266,18 @@ async function handleDeleteConfirmed() {
   medToDelete.value = null
 }
 
-async function refreshMedications() {
-    medications.value = await getDependentMedications(userId);
-}
+async function handleAddMedication(payload) {
+  const response = await addMedicationToDependent(userId, payload);
 
+  if (response.success) {
+    alert(response.message);  // shows: "Medicine assigned and status tracking initialized."
+    closeAddMedModal();
+    console.log('New medication added:', response.medication);  // contains `medicine_id`, `medicineTitle`, etc.
+    medications.value.push(response.medication);
+  } else {
+    alert(response.message);
+  }
+}
 onMounted(async () => {
   if (!userId) {
     console.warn("No userId found for profile");

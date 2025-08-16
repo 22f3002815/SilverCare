@@ -253,22 +253,13 @@ async function submit() {
     ...schedule,
   };
 
-  try {
-    const response = await apiService.post('/sc/assign-medicine', payload);
-    if (response.status >= 200 && response.status < 300) {
-        showAlert('Medicine assigned successfully!', 'success');
-        setTimeout(() => {
-            alertMessage.value = ''; // Close the alert
-            emit('medication-added'); // Tell parent to refresh
-            emit('close'); // Close the main modal
-        }, 2000); 
-    } else {
-        showAlert(response.data.message || 'Failed to assign medicine.', 'error');
-    }
-  } catch (error) {
-      console.error('Error assigning medicine schedule:', error.response?.data || error.message);
-      showAlert(error.response?.data?.message || 'An error occurred while assigning the medicine.', 'error');
+  // ✅ Include end_date only if it's filled
+  if (endDate.value && endDate.value >= startDate.value) {
+    payload.end_date = endDate.value;
   }
+
+  console.log("✅ Emitting payload with dates:", payload);
+  emit('add-medication', payload);
 }
 
 </script>

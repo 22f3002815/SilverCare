@@ -72,6 +72,11 @@
       </div>
     </div>
 
+    <!-- Show message if no requests -->
+    <div v-if="requests.length === 0" class="text-center text-muted my-5">
+      <h5>No new medicine requests for now.</h5>
+    </div>
+
     <!-- Modal -->
     <div class="modal-backdrop" v-if="showModal">
       <div class="modal-box">
