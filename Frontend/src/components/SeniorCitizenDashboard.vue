@@ -12,17 +12,15 @@
         <p class="date">{{ formattedDate }}</p>
       </div>
 
-      <div class="analog-clock">
-          <div class="hand hour-hand" :style="hourHandStyle"></div>
-          <div class="hand minute-hand" :style="minuteHandStyle"></div>
-          <div class="hand second-hand" :style="secondHandStyle"></div>
-          <div class="pivot"></div>
-      </div>
-
       <div class="header-right">
+        <!-- Digital Clock -->
+        <div class="digital-clock">
+          {{ currentTime }}
+        </div>
+
         <button class="accessibility-btn" @click="cycleFontSize" title="Cycle Font Size">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 18h16M4 6h16"/></svg>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 18h16M4 6h16"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 18h16M4 6h16"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 18h16M4 6h16"/></svg>
         </button>
         <button class="assign-btn" @click="showAddMedicineModal = true">
           Assign Medicine
@@ -44,19 +42,24 @@
             <div v-if="loading" class="med-card-placeholder">Loading...</div>
             <div v-else-if="upcomingMeds.length > 0">
               <div v-for="med in upcomingMeds" :key="med.medicineId" class="upcoming-med-card">
-                <div class="icon-wrapper alert-icon-bg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                </div>
-                <div class="med-details">
+                <div class="med-item med-name-wrapper">
+                  <div class="icon-wrapper alert-icon-bg">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                  </div>
+                  <svg class="med-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="5" width="10" height="14" rx="2" ry="2"></rect><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"></path><line x1="10" y1="12" x2="14" y2="12"></line><line x1="12" y1="10" x2="12" y2="14"></line></svg>
                   <span class="med-name">{{ med.medicineName }}</span>
+                </div>
+                <div class="med-item">
                   <span class="med-dosage">{{ med.dosage }}</span>
                 </div>
-                <div class="med-time-section">
+                <div class="med-item">
                   <span class="med-time">{{ med.time }}</span>
                 </div>
-                <button class="mark-taken-btn" @click="markMedicineTaken(med.medicineId, getSlot(med.slot))">
-                  Mark as Taken
-                </button>
+                <div class="med-item">
+                  <button class="mark-taken-btn" @click="markMedicineTaken(med.medicineId, getSlot(med.slot))">
+                    Mark as Taken
+                  </button>
+                </div>
               </div>
             </div>
             <div v-else class="med-card empty">
@@ -71,19 +74,22 @@
               <div class="meds-category">
                 <div class="category-header">
                   <div class="icon-wrapper day-icon-bg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                   </div>
                   <span>Daytime Meds</span>
                 </div>
                 <p v-if="daytimeMeds.length === 0" class="no-meds-text">No daytime medications scheduled.</p>
                 <div v-else class="med-list">
                   <div v-for="med in daytimeMeds" :key="med.id" class="med-card">
-                      <div class="med-details">
-                          <span class="med-name">{{ med.medicine_name || med.title }}</span>
-                          <span class="med-dosage">{{ med.dosage }}</span>
+                      <div class="med-item med-name-wrapper">
+                        <svg class="med-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="5" width="10" height="14" rx="2" ry="2"></rect><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"></path><line x1="10" y1="12" x2="14" y2="12"></line><line x1="12" y1="10" x2="12" y2="14"></line></svg>
+                        <span class="med-name">{{ med.medicine_name || med.title }}</span>
                       </div>
-                      <div class="med-time-section">
-                          <span class="med-time">{{ med.times.join(", ") }}</span>
+                      <div class="med-item">
+                        <span class="med-dosage">{{ med.dosage }}</span>
+                      </div>
+                      <div class="med-item">
+                        <span class="med-time">{{ med.times.join(", ") }}</span>
                       </div>
                   </div>
                 </div>
@@ -92,19 +98,22 @@
               <div class="meds-category">
                 <div class="category-header">
                   <div class="icon-wrapper night-icon-bg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                   </div>
                   <span>Nighttime Meds</span>
                 </div>
                 <p v-if="nighttimeMeds.length === 0" class="no-meds-text">No nighttime medications scheduled.</p>
                 <div v-else class="med-list">
                   <div v-for="med in nighttimeMeds" :key="med.id" class="med-card">
-                      <div class="med-details">
-                          <span class="med-name">{{ med.medicine_name || med.title || '-' }}</span>
-                          <span class="med-dosage">{{ med.dosage || '-' }}</span>
+                      <div class="med-item med-name-wrapper">
+                        <svg class="med-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="5" width="10" height="14" rx="2" ry="2"></rect><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"></path><line x1="10" y1="12" x2="14" y2="12"></line><line x1="12" y1="10" x2="12" y2="14"></line></svg>
+                        <span class="med-name">{{ med.medicine_name || med.title || '-' }}</span>
                       </div>
-                      <div class="med-time-section">
-                          <span class="med-time">{{ med.times.join(", ") }}</span>
+                      <div class="med-item">
+                        <span class="med-dosage">{{ med.dosage || '-' }}</span>
+                      </div>
+                      <div class="med-item">
+                        <span class="med-time">{{ med.times.join(", ") }}</span>
                       </div>
                   </div>
                 </div>
@@ -149,9 +158,7 @@ const sosMessage = ref('');
 const showAddMedicineModal = ref(false);
 
 const fontSizeLevel = ref(0);
-const hourHandStyle = ref({});
-const minuteHandStyle = ref({});
-const secondHandStyle = ref({});
+const currentTime = ref('');
 let clockInterval = null;
 
 const fontSizeClass = computed(() => `font-size-level-${fontSizeLevel.value}`);
@@ -182,18 +189,11 @@ function getSlot(reminderSlot) {
 }
 
 function updateTime() {
-    const now = new Date();
-    const seconds = now.getSeconds();
-    const minutes = now.getMinutes();
-    const hours = now.getHours();
-
-    const secondsDegrees = ((seconds / 60) * 360) + 90;
-    const minutesDegrees = ((minutes / 60) * 360) + ((seconds/60)*6) + 90;
-    const hoursDegrees = ((hours / 12) * 360) + ((minutes/60)*30) + 90;
-
-    secondHandStyle.value = { transform: `rotate(${secondsDegrees}deg)` };
-    minuteHandStyle.value = { transform: `rotate(${minutesDegrees}deg)` };
-    hourHandStyle.value = { transform: `rotate(${hoursDegrees}deg)` };
+    currentTime.value = new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
 }
 
 async function getUpcomingMedication() {
@@ -357,17 +357,13 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* The key CSS rule has been changed here */
 .right-panel {
   position: sticky;
   top: 2rem;
   display: flex;
   flex-direction: column;
-  /* Removed the gap property to allow for more precise spacing */
-  /* gap: 1.5rem; */
 }
 
-/* New CSS to control the space below the quote */
 .motivational-quote {
   margin-bottom: 1.5rem;
   background-color: #e9ecef;
@@ -378,7 +374,6 @@ onUnmounted(() => {
   color: #495057;
   font-size: calc(0.95rem * var(--font-scale));
 }
-/* All other styles remain the same */
 .dashboard-wrapper {
   --font-scale: 1;
 
@@ -393,7 +388,6 @@ onUnmounted(() => {
   transition: font-size 0.3s ease;
 }
 
-/* Accessibility Classes for Font Scaling */
 .dashboard-wrapper.font-size-level-0 { --font-scale: 1; }
 .dashboard-wrapper.font-size-level-1 { --font-scale: 1.1; }
 .dashboard-wrapper.font-size-level-2 { --font-scale: 1.2; }
@@ -419,7 +413,7 @@ onUnmounted(() => {
 }
 .header-left .date {
   font-size: calc(1rem * var(--font-scale));
-  color: #6c757d;
+  color: #e0e0e0;
   margin-top: 0.25rem;
 }
 
@@ -453,74 +447,18 @@ onUnmounted(() => {
   gap: 2rem;
 }
 
-.right-panel {
-  position: sticky;
-  top: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+/* --- Digital Clock --- */
+.digital-clock {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: calc(2rem * var(--font-scale));
+    font-weight: 700;
+    color: #343a40;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-right: 10rem; /* Pushes it to the right */
 }
-
-.motivational-quote {
-    background-color: #e9ecef;
-    border-left: 4px solid #007bff;
-    padding: 1rem;
-    border-radius: 8px;
-    font-style: italic;
-    color: #495057;
-    font-size: calc(0.95rem * var(--font-scale));
-}
-
-/* --- Analog Clock in Header --- */
-.analog-clock {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 3px solid #343a40;
-    position: relative;
-    background-color: #f8f9fa;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-}
-.analog-clock .hand {
-    width: 50%;
-    background: #343a40;
-    position: absolute;
-    top: 50%;
-    transform-origin: 100%;
-    transform: rotate(90deg);
-    transition: transform 0.05s cubic-bezier(0.4, 2.3, 0.6, 1);
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-}
-.analog-clock .hour-hand {
-    width: 35%;
-    left: 15%;
-    height: 4px;
-    top: calc(50% - 2px);
-}
-.analog-clock .minute-hand {
-    height: 3px;
-    top: calc(50% - 1.5px);
-}
-.analog-clock .second-hand {
-    width: 45%;
-    left: 5%;
-    height: 1px;
-    top: calc(50% - 0.5px);
-    background: #dc3545;
-}
-.analog-clock .pivot {
-    width: 8px;
-    height: 8px;
-    background: #343a40;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-}
-
 
 /* --- Buttons --- */
 .accessibility-btn {
@@ -589,7 +527,7 @@ onUnmounted(() => {
   box-shadow: none;
 }
 
-/* --- NEW MEDICATION CARD STYLES --- */
+/* --- Medication Card Styles --- */
 .upcoming-meds-section, .todays-meds-section {
     background-color: #ffffff;
     padding: 1.5rem;
@@ -602,28 +540,44 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
   border-radius: 50%;
-  margin-right: 0.8rem;
-}
-.icon-wrapper svg {
-  width: 18px;
-  height: 18px;
 }
 
 .upcoming-med-card {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
   align-items: center;
-  padding: 0.75rem 1rem;
+  gap: 1rem;
+  padding: 1rem;
   border-radius: 12px;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
   background-color: #e7f3ff;
   border: 1px solid #b3d7ff;
 }
-.upcoming-med-card .alert-icon-bg {
-  background-color: #cce5ff;
-  color: #004085;
+.med-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.med-name-wrapper {
+    justify-content: flex-start;
+    gap: 1rem; /* Increased gap */
+}
+.icon-wrapper.alert-icon-bg {
+    margin-right: 0.5rem; /* Space between icons */
+}
+.med-icon {
+    color: #004085;
+}
+
+.upcoming-med-card .med-name {
+    font-size: calc(1.2rem * var(--font-scale)); /* Increased font size */
+    font-weight: 700;
+}
+.upcoming-med-card .med-dosage {
+    font-size: calc(1rem * var(--font-scale)); /* Increased font size */
+    color: #495057;
 }
 
 .todays-meds-container {
@@ -648,6 +602,10 @@ onUnmounted(() => {
   color: #343a40;
   margin-bottom: 1rem;
 }
+.category-header .icon-wrapper {
+    width: 38px;
+    height: 38px;
+}
 
 .day-icon-bg { background-color: #fff4d5; color: #ffc107; }
 .night-icon-bg { background-color: #e9e7fd; color: #6f42c1; }
@@ -659,8 +617,10 @@ onUnmounted(() => {
 }
 
 .med-card {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
   align-items: center;
+  gap: 1rem;
   padding: 0.8rem 1rem;
   border-radius: 10px;
   background-color: #f8f9fa;
@@ -668,6 +628,7 @@ onUnmounted(() => {
 }
 
 .med-card.empty {
+  display: flex;
   justify-content: center;
   padding: 2rem;
   text-align: center;
@@ -676,34 +637,23 @@ onUnmounted(() => {
   border: 1px dashed #ced4da;
 }
 
-.med-details {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
 .med-name {
-  font-weight: 600;
+  font-weight: 700; /* Bolder */
   color: #212529;
-  font-size: calc(0.95rem * var(--font-scale));
+  font-size: calc(1.05rem * var(--font-scale)); /* Increased font size */
 }
 
 .med-dosage {
-  font-size: calc(0.8rem * var(--font-scale));
+  font-size: calc(0.9rem * var(--font-scale)); /* Increased font size */
   color: #6c757d;
 }
 
-.med-time-section {
-  text-align: right;
-  min-width: 70px;
-}
-
 .med-time {
-  font-weight: 500;
+  font-weight: 600; /* Bolder */
   color: #495057;
-  font-size: calc(0.85rem * var(--font-scale));
+  font-size: calc(0.95rem * var(--font-scale)); /* Increased font size */
   background-color: #e9ecef;
-  padding: 0.2rem 0.6rem;
+  padding: 0.3rem 0.8rem;
   border-radius: 6px;
 }
 
@@ -716,7 +666,6 @@ onUnmounted(() => {
 }
 
 .mark-taken-btn {
-  margin-left: 1rem;
   background-color: #28a745;
   border: none;
   color: white;
@@ -733,24 +682,6 @@ onUnmounted(() => {
   background-color: #218838;
 }
 
-/* These styles are now unused in the dashboard */
-.collapsible-card {
-  display: none;
-}
-.collapsible-header {
-  display: none;
-}
-.collapsible-title {
-  display: none;
-}
-.toggle-icon {
-  display: none;
-}
-.right-panel > :deep(.calendar-wrapper) {
-  margin-top: -1rem !important;
-}
-
-/* Responsive adjustments */
 @media (max-width: 992px) {
     .main-content {
         grid-template-columns: 1fr;
@@ -764,10 +695,10 @@ onUnmounted(() => {
     .header-left, .header-right {
         flex-basis: 45%;
     }
-    .analog-clock {
+    .digital-clock {
         order: -1;
         flex-basis: 100%;
-        margin: 0 auto;
+        text-align: center;
     }
 }
 

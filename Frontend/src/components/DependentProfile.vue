@@ -1,79 +1,91 @@
 <template>
-  <div class="page-container">
-    <div v-if="isLoading" class="loading">Loading Profile...</div>
-    <div v-else-if="!dependent" class="loading">Profile not found.</div>
+  <div class="dashboard-wrapper">
+    <header class="dashboard-header">
+      <Navbar />
+    </header>
 
-    <div v-else class="profile-container">
-      <header class="dashboard-header">
-        <Navbar />
-      </header>
+    <main class="main-content">
+      <div v-if="isLoading" class="loading-state">Loading Profile...</div>
+      <div v-else-if="!dependent" class="loading-state">Profile not found.</div>
 
-      <h1>{{ dependent.firstName }}'s Profile</h1>
-
-      <!-- User Details -->
-      <div class="user-details-grid">
-        <div class="detail-item">
-          <label>Name</label>
-          <input type="text" :value="`${dependent.firstName} ${dependent.lastName}`" readonly />
+      <div v-else class="profile-container">
+        <div class="profile-header">
+            <h1 class="profile-title">{{ dependent.firstName }}'s Profile</h1>
         </div>
-      </div>
 
-      <!-- Daytime Meds -->
-      <div class="meds-section">
-        <div class="meds-header">
-          <span><i class="icon-sun"></i> Daytime Meds</span>
-          <button class="add-medicine-btn" @click="openAddMedModal">Add a medicine</button>
+        <!-- User Details -->
+        <div class="profile-details">
+            <div class="info-row">
+                <span class="label">Full Name</span>
+                <span class="value">{{ dependent.firstName }} {{ dependent.lastName }}</span>
+            </div>
         </div>
-        <div v-if="daytimeMeds.length === 0" class="no-meds">No daytime medicines scheduled.</div>
-        <div v-else>
-          <div v-for="med in daytimeMeds" :key="med.id" class="med-row daytime">
-            <span class="med-name">{{ med.medicineTitle }}</span>
-            <span class="med-dosage">{{ med.dosage }}</span>
-            <span class="med-time"><i class="icon-clock" /> {{ formatTime(med) }}</span>
-            <div class="med-row-controls">
-            <span class="icon-edit" @click="openEditModal(med)" />
-            <span class="icon-trash" @click="openDeleteModal(med.id)" />
+
+        <!-- Daytime Meds -->
+        <div class="meds-section">
+          <div class="meds-header">
+            <div class="meds-header-title">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              <h3>Daytime Meds</h3>
+            </div>
+            <button class="add-medicine-btn" @click="openAddMedModal">Add Medicine</button>
+          </div>
+          <div v-if="daytimeMeds.length === 0" class="no-meds">No daytime medicines scheduled.</div>
+          <div v-else class="med-list">
+            <div v-for="med in daytimeMeds" :key="med.id" class="med-card daytime">
+              <div class="med-name-wrapper">
+                <svg class="med-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="5" width="10" height="14" rx="2" ry="2"></rect><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"></path><line x1="10" y1="12" x2="14" y2="12"></line><line x1="12" y1="10" x2="12" y2="14"></line></svg>
+                <span class="med-name">{{ med.medicineTitle }}</span>
+              </div>
+              <span class="med-dosage">{{ med.dosage }}</span>
+              <span class="med-time">{{ formatTime(med) }}</span>
+              <div class="med-controls">
+                <button class="icon-btn edit-btn" @click="openEditModal(med)" title="Edit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                <button class="icon-btn delete-btn" @click="openDeleteModal(med.id)" title="Delete"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nighttime Meds -->
+        <div class="meds-section">
+          <div class="meds-header">
+             <div class="meds-header-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <h3>Nighttime Meds</h3>
+             </div>
+          </div>
+          <div v-if="nighttimeMeds.length === 0" class="no-meds">No nighttime medicines scheduled.</div>
+          <div v-else class="med-list">
+            <div v-for="med in nighttimeMeds" :key="med.id" class="med-card nighttime">
+                <div class="med-name-wrapper">
+                  <svg class="med-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="5" width="10" height="14" rx="2" ry="2"></rect><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"></path><line x1="10" y1="12" x2="14" y2="12"></line><line x1="12" y1="10" x2="12" y2="14"></line></svg>
+                  <span class="med-name">{{ med.medicineTitle }}</span>
+                </div>
+                <span class="med-dosage">{{ med.dosage }}</span>
+                <span class="med-time">{{ formatTime(med) }}</span>
+                <div class="med-controls">
+                    <button class="icon-btn edit-btn" @click="openEditModal(med)" title="Edit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                    <button class="icon-btn delete-btn" @click="openDeleteModal(med.id)" title="Delete"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
+                </div>
             </div>
           </div>
         </div>
       </div>
+    </main>
 
-      <!-- Nighttime Meds -->
-      <div class="meds-section">
-        <div class="meds-header">
-          <span><i class="icon-moon"></i> Nighttime Meds</span>
-        </div>
-        <div v-if="nighttimeMeds.length === 0" class="no-meds">No nighttime medicines scheduled.</div>
-        <div v-else>
-          <div v-for="med in nighttimeMeds" :key="med.id" class="med-row nighttime">
-            <span class="med-name">{{ med.medicineTitle }}</span>
-            <span class="med-dosage">{{ med.dosage }}</span>
-            <span class="med-time"><i class="icon-clock" /> {{ formatTime(med) }}</span>
-            <div class="med-row-controls">
-            <span class="icon-edit" @click="openEditModal(med)" />
-            <span class="icon-trash" @click="openDeleteModal(med.id)" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Add Medicine Modal -->
+    <!-- Modals -->
     <AddMedicineModal
       v-if="showAddMedModal"
       @close="closeAddMedModal"
-      @add-medication="handleAddMedication"
+      @medication-added="refreshMedications"
     />
-
     <EditMedicineModal
-  v-if="showEditMedModal"
-  :medicine="medToEdit"
-  @close="closeEditMedModal"
-  @update-medication="handleUpdateMedication"
-/>
-
-
-    <!-- ✅ Confirm Delete Modal -->
+      v-if="showEditMedModal"
+      :medicine="medToEdit"
+      @close="closeEditMedModal"
+      @update-medication="handleUpdateMedication"
+    />
     <ConfirmModal
       v-if="showDeleteModal"
       message="Are you sure you want to delete this medication from the schedule?"
@@ -96,8 +108,6 @@ import apiService from '@/services/apiService'
 const route = useRoute()
 let userId = route.params.userId
 
-// If no dependent id is passed (e.g., senior viewing own profile),
-// use the logged-in user's ID
 if (!userId) {
   userId = sessionStorage.getItem('user_id') || null
 }
@@ -106,9 +116,10 @@ const isLoading = ref(true)
 const dependent = ref(null)
 const medications = ref([])
 const showAddMedModal = ref(false)
-
 const showDeleteModal = ref(false)
 const medToDelete = ref(null)
+const showEditMedModal = ref(false)
+const medToEdit = ref(null)
 
 const daytimeMeds = computed(() =>
   medications.value.filter(
@@ -136,8 +147,6 @@ const formatTime = (med) => {
   if (med.dinner_after) slots.push('After Dinner')
   return slots.join(', ')
 }
-const showEditMedModal = ref(false)
-const medToEdit = ref(null)
 
 function openEditModal(med) {
   medToEdit.value = { ...med }
@@ -153,17 +162,17 @@ async function handleUpdateMedication(updatedData) {
   try {
     const res = await apiService.put(`/sc/medication/${medToEdit.value.id}`, updatedData)
     if (res.status === 200) {
-      const idx = medications.value.findIndex(m => m.id === medToEdit.value.id)
-      if (idx !== -1) medications.value[idx] = { ...medications.value[idx], ...updatedData }
       alert('Medication updated successfully.')
       closeEditMedModal()
+      refreshMedications(); // Refresh list
     }
   } catch (err) {
-  console.error('Error updating medication:', err)
-  const backendMsg = err.response?.data?.error || err.response?.data?.message || err.message
-  alert(backendMsg)
+    console.error('Error updating medication:', err)
+    const backendMsg = err.response?.data?.error || err.response?.data?.message || err.message
+    alert(backendMsg)
+  }
 }
-}
+
 async function getDependentDetails(id) {
   try {
     const res = await apiService.get(`/sc/dependent/${id}/details`)
@@ -194,44 +203,6 @@ async function deleteMedicationMapping(medId) {
   }
 }
 
-async function addMedicationToDependent(userId, payload) {
-  try {
-    const userRole = sessionStorage.getItem('role');
-    const requestBody = { ...payload };
-    if (userRole === 'care_giver') {
-      requestBody.senior_citizen_id = Number(userId);
-    }
-
-    const res = await apiService.post(`/sc/assign-medicine`, requestBody);
-
-    console.log('🔍 API Response:', res.data);
-
-    // Debug check: log what you're actually testing
-    if (res.data && res.data.medication) {
-      console.log('✅ Medication found:', res.data.medication);
-      return {
-        success: true,
-        medication: res.data.medication,
-        message: res.data.message || 'Medicine assigned successfully.'
-      };
-    } else {
-      console.warn('⚠️ Medication not found in response');
-      return {
-        success: false,
-        message: res.data.message || 'Failed to assign medicine.'
-      };
-    }
-
-  } catch (err) {
-    console.error('❌ Error adding medication:', err.response?.data || err.message);
-    return {
-      success: false,
-      message: err.response?.data?.error || 'Failed to assign medicine.'
-    };
-  }
-}
-
-
 function openAddMedModal() {
   showAddMedModal.value = true
 }
@@ -259,17 +230,8 @@ async function handleDeleteConfirmed() {
   medToDelete.value = null
 }
 
-async function handleAddMedication(payload) {
-  const response = await addMedicationToDependent(userId, payload);
-
-  if (response.success) {
-    alert(response.message);  // shows: "Medicine assigned and status tracking initialized."
-    closeAddMedModal();
-    console.log('New medication added:', response.medication);  // contains `medicine_id`, `medicineTitle`, etc.
-    medications.value.push(response.medication);
-  } else {
-    alert(response.message);
-  }
+async function refreshMedications() {
+    medications.value = await getDependentMedications(userId);
 }
 
 onMounted(async () => {
@@ -289,80 +251,83 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
-
-/* Icon styles */
-.icon-sun::before { content: '\f185'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; }
-.icon-moon::before { content: '\f186'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; }
-.icon-pill::before { content: '\f484'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: #dc3545; }
-.icon-clock::before { content: '\f017'; font-family: 'Font Awesome 6 Free'; font-weight: 400; margin-right: 5px; }
-.icon-trash::before { content: '\f2ed'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: #dc3545; cursor: pointer; }
-
-/* General page */
-.page-container {
-  background-color: #eaf5e9;
-  font-family: "Times New Roman", serif;
-  min-height: calc(100vh - 58px);
-  padding: 2.5rem 3rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.dashboard-wrapper {
+  background: url('https://images.unsplash.com/photo-1530305408560-82d13781b33a?q=80&w=2072&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  padding: 2rem;
+  padding-top: 100px;
 }
 
-.loading {
-  font-size: 1.5rem;
-  color: #555;
-  margin-top: 5rem;
+.main-content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.loading-state {
+    color: white;
+    font-size: 1.5rem;
+    text-align: center;
+    margin-top: 5rem;
 }
 
 .profile-container {
-  background-color: #fdfdfd;
+  background-color: #ffffff;
   border-radius: 16px;
-  padding: 2rem 3rem;
+  padding: 2.5rem;
   width: 100%;
   max-width: 950px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* Title */
-h1 {
-  text-align: center;
+.profile-header {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-title {
+  font-family: 'Georgia', serif;
+  font-size: calc(2.5rem * var(--font-scale));
+  font-weight: 700;
+  color: #343a40;
+  margin: 0;
+}
+
+.profile-details {
+  padding-top: 1rem;
   margin-bottom: 2rem;
-  font-weight: 600;
 }
 
-/* User detail grid */
-.user-details-grid {
+.info-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: 150px 1fr;
+  align-items: center;
   gap: 1.5rem;
-  margin-bottom: 2.5rem;
+  padding: 0.8rem 0; /* Reduced padding */
+  border-bottom: 1px solid #e9ecef;
+}
+.info-row:last-child {
+    border-bottom: none;
 }
 
-.detail-item {
-  font-family: 'Times New Roman';
-
-  display: flex;
-  flex-direction: column;
+.label {
+  font-weight: 600;
+  font-size: calc(1rem * var(--font-scale)); /* Reduced font size */
+  color: #6c757d;
 }
 
-.detail-item label {
-  margin-bottom: 0.5rem;
-  color: #333;
+.value {
+  font-size: calc(1rem * var(--font-scale)); /* Reduced font size */
+  color: #212529;
   font-weight: 500;
+  text-align: left;
 }
 
-.detail-item input {
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid #b0d0b0;
-  background-color: #f9fff9;
-  font-family: inherit;
-  font-size: 1rem;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-}
-
-/* Medication sections */
 .meds-section {
   margin-bottom: 2rem;
 }
@@ -371,114 +336,106 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #2c3e50;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+.meds-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #343a40;
+}
+.meds-header-title h3 {
+    font-family: 'Georgia', serif;
+    font-size: calc(1.8rem * var(--font-scale));
+    margin: 0;
+}
+.meds-header-title svg {
+    color: #007bff;
 }
 
-/* Add Med Button */
 .add-medicine-btn {
-  background-color: #4a74ce;
+  background-color: #007bff;
   color: white;
   border: none;
-  padding: 8px 18px;
-  font-size: 0.95rem;
-  border-radius: 20px;
+  padding: 0.7rem 1.5rem;
+  font-size: calc(0.95rem * var(--font-scale));
+  border-radius: 50px;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-  transition: background-color 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.25);
+  transition: all 0.2s ease;
+  font-weight: 600;
 }
 .add-medicine-btn:hover {
-  background-color: #00796b;
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,123,255,0.3);
 }
 
-/* Med row styling - pill card look */
-.med-row {
+.med-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.med-card {
   display: grid;
-  grid-template-columns: 30px 1fr 1fr 1.2fr 30px;
+  grid-template-columns: 2.5fr 1.5fr 2fr auto;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.2rem;
-  border-radius: 25px;
-  margin-bottom: 1rem;
-  font-family: 'Times New Roman';
-  box-shadow: 0 4px 8px rgba(0,0,0,0.06);
-  border: 2px solid transparent;
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+}
+.med-card.daytime { background-color: #fff9e6; }
+.med-card.nighttime { background-color: #f3e8fd; }
+
+.med-name-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.med-icon {
+    color: #495057;
 }
 
-/* Backgrounds based on time */
-.med-row.daytime {
-  background-color: #fffce8;
-  border-color: #ffe082;
-}
-
-.med-row.nighttime {
-  background-color: #f3e8ff;
-  border-color: #ce93d8;
-}
-
-/* Med row text formatting */
 .med-name {
-  font-weight: bold;
-  font-size: 1rem;
-  color: #2e2e2e;
+  font-weight: 600;
+  font-size: calc(1rem * var(--font-scale));
 }
-
 .med-dosage {
-  color: #555;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--font-scale));
+  color: #6c757d;
 }
-
 .med-time {
-  font-size: 0.92rem;
-  color: #666;
-  display: flex;
-  align-items: center;
+  font-size: calc(0.95rem * var(--font-scale));
+  color: #495057;
 }
 
-/* No meds message */
-.no-meds {
-  padding: 1rem;
-  text-align: center;
-  color: #777;
-  font-style: italic;
-  background-color: rgba(255, 255, 255, 0.4);
-  border-radius: 15px;
+.med-controls {
+  display: flex;
+  gap: 0.75rem;
 }
-.icon-edit::before {
-  content: '\f304'; /* FontAwesome edit/pencil */
-  font-family: 'Font Awesome 6 Free';
-  font-weight: 900;
-  color: #007bff;
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 50%;
   cursor: pointer;
-  font-size: 18px;          /* Smaller size */
-  margin-right: 2px;        /* Little spacing before delete icon */
-  vertical-align: middle;   /* Aligns it nicely with text */
-  padding: 0;               /* Removes extra space */
-}
-
-.icon-edit:hover::before {
-  color: #0056b3;
-  font-size: 18px;          /* Keeps size consistent on hover */
-}
-.med-row-controls {
   display: flex;
-  gap: 25px;              /* Small space between icons */
-  justify-content: flex-end;
   align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
 }
-.med-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 2fr 1.2fr 50px;  /* last column wider for icons */
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.2rem;
-  border-radius: 25px;
-  margin-bottom: 1rem;
-  font-family: 'Times New Roman';
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
-  border: 2px solid transparent;
-}
+.icon-btn.edit-btn { color: #007bff; }
+.icon-btn.delete-btn { color: #dc3545; }
+.icon-btn:hover { background-color: #e9ecef; }
 
+.no-meds {
+  padding: 1.5rem;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+}
 </style>

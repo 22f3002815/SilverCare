@@ -6,51 +6,63 @@
 
     <main class="main-content">
       <div class="profile-container">
-        <h1 class="profile-title">My Profile</h1>
-        <button v-if="user.role==='senior_citizen'"
-  class="view-profile-btn" 
-  @click="goToMyProfilePage">
-  View My Full Profile
-</button>
+        <div class="profile-header">
+            <h1 class="profile-title">My Profile</h1>
+            <button v-if="user.role==='senior_citizen'"
+                class="view-profile-btn" 
+                @click="goToMyProfilePage">
+                View Full Medical Profile
+            </button>
+        </div>
+        
         <div class="profile-details">
           <div class="info-row">
-            <span class="label">Full Name :</span>
+            <span class="label">Full Name</span>
             <span class="value">{{ user.firstName }} {{ user.lastName }}</span>
           </div>
           <div class="info-row">
-            <span class="label">Username :</span>
+            <span class="label">Username</span>
             <span class="value">{{ user.username }}</span>
           </div>
+          
           <!-- Caregiver Information -->
           <div v-if="user.role === 'senior_citizen' && caregiver">
             <h3 class="section-title">My Caregiver</h3>
-            <p v-if="!caregiver">No caregiver assigned yet.</p>
             <div class="info-row">
-              <span class="label">Full Name :</span>
+              <span class="label">Full Name</span>
               <span class="value">{{ caregiver.firstName }} {{ caregiver.lastName }}</span>
             </div>
             <div class="info-row">
-              <span class="label">Username :</span>
+              <span class="label">Username</span>
               <span class="value">{{ caregiver.username }}</span>
             </div>
           </div>
+          <div v-else-if="user.role === 'senior_citizen' && !caregiver" class="no-data-notice">
+            <h3 class="section-title">My Caregiver</h3>
+            <p>No caregiver has been assigned yet.</p>
+          </div>
+          
           <!-- Dependents Information -->
-          <div v-if="user.role === 'care_giver' && dependents.length>0">
+          <div v-if="user.role === 'care_giver' && dependents.length > 0">
             <h3 class="section-title">My Dependents</h3>
-          <div v-for="(d, index) in dependents" :key="d.id" class="dependent-section">
-            <h4 class="dependent-title">Dependent {{ index + 1 }}</h4>
+            <div v-for="(d, index) in dependents" :key="d.id" class="dependent-section">
+              <h4 class="dependent-title">Dependent {{ index + 1 }}</h4>
               <div class="info-row">
-                <span class="label">Full Name :</span>
+                <span class="label">Full Name</span>
                 <span class="value">{{ d.firstName }} {{ d.lastName }}</span>
               </div>
               <div class="info-row">
-                <span class="label">Username :</span>
+                <span class="label">Username</span>
                 <span class="value">{{ d.username }}</span>
               </div>
+            </div>
+          </div>
+           <div v-else-if="user.role === 'care_giver' && dependents.length === 0" class="no-data-notice">
+            <h3 class="section-title">My Dependents</h3>
+            <p>You have not added any dependents yet.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
     </main>
   </div>
 </template>
@@ -111,115 +123,123 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-:global(html, body) {
-  margin: 0;
-  padding: 0;
-}
-
 .dashboard-wrapper {
-  background-color: #f0f8f1;
+  background: url('https://images.unsplash.com/photo-1530305408560-82d13781b33a?q=80&w=2072&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   min-height: 100vh;
-  font-family: "Times New Roman", serif;
-  padding: 0;
-  margin: 0;
+  font-family: 'Inter', sans-serif;
+  padding: 2rem;
+  padding-top: 100px;
 }
 
 .main-content {
-  padding: 2rem 3rem;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
 }
 
 .profile-container {
-  background-color: white;
-  border-radius: 18px;
-  padding: 2rem;
-  max-width: 700px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 2.5rem;
   width: 100%;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  max-width: 800px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .profile-title {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 2rem;
+  font-family: 'Georgia', serif;
+  font-size: calc(2.5rem * var(--font-scale));
+  font-weight: 700;
+  color: #343a40;
+  margin: 0;
 }
 
 .profile-details {
-  padding: 1.5rem;
-  border-radius: 8px;
+  padding-top: 1rem;
 }
 
 .info-row {
-  display: grid;
-  grid-template-columns: 2fr 2fr;
-  gap: 1rem;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  background-color: #f0f8ff;
-  padding: 0.8rem;
-  margin-bottom: 1rem;
-  border-radius: 6px;
-  margin-left: 20%;
-  margin-right: 20%;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+.info-row:last-child {
+    border-bottom: none;
 }
 
 .label {
-  font-weight: bold;
+  font-weight: 600;
+  font-size: calc(1.1rem * var(--font-scale));
+  color: #6c757d;
 }
 
 .value {
-  color: #555;
-  text-align: center;
+  font-size: calc(1.1rem * var(--font-scale));
+  color: #212529;
+  font-weight: 500;
+  text-align: right;
 }
 
 .section-title {
-  font-size: 1.5rem;
-  margin: 2rem 0 1rem;
-  border-bottom: 2px solid #66bb6a;
+  font-family: 'Georgia', serif;
+  font-size: calc(1.8rem * var(--font-scale));
+  margin: 2.5rem 0 1.5rem;
   padding-bottom: 0.5rem;
+  border-bottom: 2px solid #007bff;
+  color: #343a40;
 }
 
 .dependent-section {
-  padding: 1.2rem;
+  padding: 1.5rem;
   margin-bottom: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background-color: #f0f8ff;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
 }
 
 .dependent-title {
-  font-size: 1.25rem;
+  font-size: calc(1.25rem * var(--font-scale));
+  font-weight: 600;
   margin-bottom: 1rem;
-}
-.medicine-section {
-  margin-top: 2rem;
-  background-color: #f0f8ff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  color: #495057;
 }
 
-.medicine-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 2fr;
-  background-color: #f0f8ff;
-  padding: 0.8rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
-}
 .view-profile-btn {
-  background-color: #4a74ce;
+  background-color: #007bff;
   color: white;
   border: none;
-  padding: 8px 18px;
-  font-size: 0.95rem;
-  border-radius: 20px;
+  padding: 0.7rem 1.5rem;
+  font-size: calc(0.95rem * var(--font-scale));
+  border-radius: 50px;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-  transition: background-color 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.25);
+  transition: all 0.2s ease;
+  font-weight: 600;
 }
 .view-profile-btn:hover {
- background-color: #00796b;
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+}
+
+.no-data-notice {
+    padding: 1rem;
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
 }
 </style>
