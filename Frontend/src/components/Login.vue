@@ -69,6 +69,7 @@ export default {
   methods: {
     async handleSubmit() {
       try {
+        console.log(`${process.env.VUE_APP_API_URL}/auth/login`);
         const response = await fetch(`${process.env.VUE_APP_API_URL}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
