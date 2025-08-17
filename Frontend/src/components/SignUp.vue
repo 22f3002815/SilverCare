@@ -93,7 +93,9 @@ export default {
         return;
       }
       try {
-        const response = await fetch(`${process.env.VUE_APP_API_URL}/auth/signup`, {
+        const baseUrl = process.env.VUE_APP_API_URL.replace(/\/$/, ""); // Remove trailing slash
+        console.log(baseUrl);
+        const response = await fetch(`${baseUrl}/auth/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
