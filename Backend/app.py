@@ -22,7 +22,7 @@ def create_app():
     "http://localhost:8080",
     "http://localhost:8081",
     "http://10.244.53.76:8080",
-    "https://silver-care-two.vercel.app/"
+    "https://silver-care-two.vercel.app"
 ]}}, supports_credentials=True)
 
     # CORS(app)
