@@ -21,7 +21,8 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": [
     "http://localhost:8080",
     "http://localhost:8081",
-    "http://10.244.53.76:8080"
+    "http://10.244.53.76:8080",
+    "https://silver-care-two.vercel.app/"
 ]}}, supports_credentials=True)
 
     # CORS(app)
@@ -87,4 +88,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(debug=True, port=int(os.getenv('PORT', 5000)), host='0.0.0.0')
