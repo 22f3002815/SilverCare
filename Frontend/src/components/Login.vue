@@ -68,17 +68,19 @@ export default {
   },
   methods: {
     async handleSubmit() {
-      try {
-        const baseUrl = process.env.VUE_APP_API_URL.replace(/\/$/, ""); // Remove trailing slash
-        console.log("ENV API URL:", process.env.VUE_APP_API_URL);
-        const response = await fetch(`${baseUrl}/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: this.username,
-            password: this.password,
-          }),
-        });
+  try {
+    const envApiUrl = process.env.VUE_APP_API_URL;
+    const baseUrl = envApiUrl ? envApiUrl.replace(/\/$/, "") : "http://localhost:5000";
+    console.log("ENV API URL:", envApiUrl);
+
+    const response = await fetch(`${baseUrl}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: this.username,
+        password: this.password,
+      }),
+    });
         const data = await response.json();
 
         const result = response.ok
