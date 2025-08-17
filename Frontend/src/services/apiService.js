@@ -1,8 +1,9 @@
 import axios from "axios";
 import { emitter } from "@/eventBus";
 
+const base_url = process.env.VUE_APP_API_URL;
 const apiService = axios.create({
-  baseURL: "http://127.0.0.1:5000",
+  baseURL: base_url,
   headers: {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -15,14 +16,11 @@ export async function verifyToken() {
     const token = sessionStorage.getItem("accesstoken");
     if (!token) return false;
 
-    const response = await axios.get(
-      "http://127.0.0.1:5000/set/api/verify-token",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.get(`${base_url}/set/api/verify-token`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     const isValid = response.data.valid;
     if (!isValid) {
