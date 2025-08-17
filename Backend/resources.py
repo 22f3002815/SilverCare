@@ -2201,8 +2201,6 @@ class UserStats(Resource):
             for s in um.statuses:
                 status_date = s.date.date()
                 if last_30_excluding_today <= status_date <= today:
-                    now_hour = datetime.now().hour
-
                     for slot_name, slot_val in [
                         ("breakfast_before", s.breakfast_before),
                         ("breakfast_after", s.breakfast_after),
@@ -2213,22 +2211,10 @@ class UserStats(Resource):
                     ]:
                         if slot_val is not None:
                             stacked[name]["total_assigned"] += 1
-
-                            if status_date < today:
-                                if slot_val:
-                                    stacked[name]["taken"] += 1
-                                else:
-                                    stacked[name]["missed"] += 1
-
-                            elif status_date == today:
-                                slot_start, slot_end = slot_times[slot_name]
-                                if now_hour >= slot_end:
-                                    if slot_val:
-                                        stacked[name]["taken"] += 1
-                                    else:
-                                        stacked[name]["missed"] += 1
-                                else:
-                                    pass
+                            if slot_val:
+                                stacked[name]["taken"] += 1
+                            else:
+                                stacked[name]["missed"] += 1
 
 
         # Vitals: last 7 days INCLUDING today
