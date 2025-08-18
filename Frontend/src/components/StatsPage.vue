@@ -202,7 +202,7 @@ function selectMember(m){ current.value = m.username }
 async function fetchAllStats() {
   if (!uid || !token) return router.push('/login')
   if (role==='care_giver') {
-    const dres = await fetch('http://localhost:5000/sc/my-dependents', {
+    const dres = await fetch(`${process.env.VUE_APP_API_URL}/sc/my-dependents`, {
       headers:{ 'Authorization':`Bearer ${token}` }
     })
     const { dependents } = await dres.json()
@@ -211,7 +211,7 @@ async function fetchAllStats() {
       return router.push('/manage-dependents')
     }
     for (const m of dependents) {
-      const r = await fetch(`http://localhost:5000/sc/user-stats/${m.id}`, {
+      const r = await fetch(`${process.env.VUE_APP_API_URL}/sc/user-stats/${m.id}`, {
         headers:{ 'Authorization':`Bearer ${token}` }
       })
       statsMap.value[m.username] = await r.json()
@@ -222,7 +222,7 @@ async function fetchAllStats() {
   }
   else if (role==='senior_citizen') {
     members.value = [{ id: uid, username: 'Me' }]
-    const r = await fetch(`http://localhost:5000/sc/user-stats/${uid}`, {
+    const r = await fetch(`${process.env.VUE_APP_API_URL}/sc/user-stats/${uid}`, {
       headers:{ 'Authorization':`Bearer ${token}` }
     })
     statsMap.value['Me'] = await r.json()
